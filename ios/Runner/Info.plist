@@ -6,6 +6,12 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Mycelium utilise votre position pour centrer la carte et vous guider jusqu'à vos coins à champignons.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Mycelium utilise l'appareil photo pour photographier vos champignons.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Mycelium accède à vos photos pour illustrer vos fiches d'espèces.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Mycelium</string>
 	<key>CFBundleExecutable</key>

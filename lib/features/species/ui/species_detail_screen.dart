@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/rustic.dart';
 import '../../../core/safety_widgets.dart';
 import '../../../data/providers.dart';
 
@@ -59,23 +60,41 @@ class SpeciesDetailScreen extends ConsumerWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 18, 16, 28),
         children: [
-          if (photo != null && File(photo).existsSync())
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.file(File(photo), height: 220, fit: BoxFit.cover),
-            ),
-          if (species.scientificName != null) ...[
-            const SizedBox(height: 12),
-            Text(
-              species.scientificName!,
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(fontStyle: FontStyle.italic),
-            ),
-          ],
-          if (species.family != null) Text(species.family!),
-          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Hero(
+                tag: 'species-${species.id}',
+                child: photo != null && File(photo).existsSync()
+                    ? CircleAvatar(radius: 44, backgroundImage: FileImage(File(photo)))
+                    : CircleAvatar(
+                        radius: 44,
+                        backgroundColor: species.edibility.color.withValues(alpha: 0.16),
+                        child: Icon(species.edibility.icon,
+                            size: 44, color: species.edibility.color),
+                      ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(species.commonName, style: theme.textTheme.headlineSmall),
+                    if (species.scientificName != null)
+                      Text(
+                        species.scientificName!,
+                        style: theme.textTheme.titleMedium
+                            ?.copyWith(fontStyle: FontStyle.italic, fontWeight: FontWeight.w400),
+                      ),
+                    if (species.family != null) Text(species.family!),
+                  ],
+                ),
+              ),
+            ],
+          ).stagger(0),
+          const SizedBox(height: 14),
           if (species.isCustom)
             const InfoBanner(
               title: 'Fiche personnelle, non vérifiée',
@@ -84,62 +103,82 @@ class SpeciesDetailScreen extends ConsumerWidget {
                   'ni son exactitude ni la comestibilité de cette espèce.',
               color: Color(0xFFE0E0E0),
               icon: Icons.person,
-            )
-          else ...[
-            Align(
-              alignment: Alignment.centerLeft,
-              child: EdibilityChip(
-                label: species.edibility.label,
-                color: species.edibility.color,
-                icon: species.edibility.icon,
-              ),
-            ),
-            if (species.edibilityNote != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(species.edibilityNote!),
-              ),
+            ).stagger(1)
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                EdibilityChip(
+                  label: species.edibility.label,
+                  color: species.edibility.color,
+                  icon: species.edibility.icon,
+                ),
+                if (species.edibilityNote != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(species.edibilityNote!),
+                  ),
+              ],
+            ).stagger(1),
+          if (photo != null && File(photo).existsSync()) ...[
+            const SizedBox(height: 14),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Image.file(File(photo), height: 220, fit: BoxFit.cover),
+            ).stagger(2),
           ],
-          const SizedBox(height: 16),
-          if (species.description.isNotEmpty) ...[
-            Text('Description', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text(species.description),
-            const SizedBox(height: 16),
-          ],
-          if (species.habitat != null) ...[
-            Text('Habitat', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text(species.habitat!),
-            const SizedBox(height: 16),
-          ],
-          if (species.seasonLabel != null) ...[
-            Text('Période', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text(species.seasonLabel!),
-            const SizedBox(height: 16),
-          ],
+          const SizedBox(height: 6),
+          const LeafDivider(),
+          if (species.description.isNotEmpty)
+            _Section(title: 'Description', body: species.description).stagger(2),
+          if (species.habitat != null)
+            _Section(title: 'Habitat', body: species.habitat!).stagger(3),
+          if (species.seasonLabel != null)
+            _Section(title: 'Période', body: species.seasonLabel!).stagger(4),
           if (species.confusions.isNotEmpty) ...[
-            Text('⚠️ Confusions possibles', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text('⚠️ Confusions possibles', style: theme.textTheme.titleMedium).stagger(5),
             const SizedBox(height: 4),
-            for (final c in species.confusions)
+            for (var i = 0; i < species.confusions.length; i++)
               Card(
+                margin: const EdgeInsets.symmetric(vertical: 5),
                 child: ListTile(
-                  title: Text(c.name),
-                  subtitle: Text(c.note),
-                  trailing: c.speciesId != null
+                  title: Text(species.confusions[i].name,
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                  subtitle: Text(species.confusions[i].note),
+                  trailing: species.confusions[i].speciesId != null
                       ? const Icon(Icons.chevron_right)
                       : null,
-                  onTap: c.speciesId == null
+                  onTap: species.confusions[i].speciesId == null
                       ? null
-                      : () => context.push('/species/${c.speciesId}'),
+                      : () => context.push('/species/${species.confusions[i].speciesId}'),
                 ),
-              ),
+              ).stagger(6 + i),
           ],
           const SizedBox(height: 16),
-          const SafetyDisclaimer(),
+          const SafetyDisclaimer().stagger(8),
         ],
       ),
     );
   }
+}
+
+class _Section extends StatelessWidget {
+  const _Section({required this.title, required this.body});
+
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(top: 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(body, style: const TextStyle(height: 1.4)),
+          ],
+        ),
+      );
 }

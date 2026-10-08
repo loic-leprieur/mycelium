@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/rustic.dart';
 import '../../../data/providers.dart';
 import '../domain/species.dart';
 
@@ -39,7 +40,7 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
             child: TextField(
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.search),
@@ -58,10 +59,11 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: FilterChip(
+                      avatar: Icon(e.icon, size: 18, color: e.color),
                       label: Text(e.label),
                       selected: _filter == e,
-                      onSelected: (on) =>
-                          setState(() => _filter = on ? e : null),
+                      showCheckmark: false,
+                      onSelected: (on) => setState(() => _filter = on ? e : null),
                     ),
                   ),
               ],
@@ -73,13 +75,16 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                 final shown = all.where(_matches).toList()
                   ..sort((a, b) => a.commonName.compareTo(b.commonName));
                 if (shown.isEmpty) {
-                  return const Center(child: Text('Aucune espèce trouvée.'));
+                  return const EmptyState(
+                    title: 'Aucune espèce trouvée',
+                    message: 'Essayez un autre nom ou retirez un filtre.',
+                  );
                 }
-                return ListView.separated(
-                  padding: const EdgeInsets.only(bottom: 88),
+                return ListView.builder(
+                  padding: const EdgeInsets.only(top: 6, bottom: 96),
                   itemCount: shown.length,
-                  separatorBuilder: (_, _) => const Divider(height: 1),
-                  itemBuilder: (context, i) => _SpeciesTile(species: shown[i]),
+                  itemBuilder: (context, i) =>
+                      _SpeciesTile(species: shown[i]).stagger(i),
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -100,22 +105,33 @@ class _SpeciesTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final photo = species.photoPath;
-    return ListTile(
-      minTileHeight: 64,
-      leading: photo != null && File(photo).existsSync()
-          ? CircleAvatar(backgroundImage: FileImage(File(photo)))
-          : CircleAvatar(
-              backgroundColor: species.edibility.color.withValues(alpha: 0.15),
-              child: Icon(species.edibility.icon, color: species.edibility.color),
-            ),
-      title: Text(species.commonName),
-      subtitle: Text(
-        species.isCustom
-            ? 'Fiche personnelle, non vérifiée'
-            : '${species.scientificName ?? ''} · ${species.edibility.label}',
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        minTileHeight: 72,
+        leading: Hero(
+          tag: 'species-${species.id}',
+          child: photo != null && File(photo).existsSync()
+              ? CircleAvatar(radius: 26, backgroundImage: FileImage(File(photo)))
+              : CircleAvatar(
+                  radius: 26,
+                  backgroundColor: species.edibility.color.withValues(alpha: 0.16),
+                  child: Icon(species.edibility.icon, color: species.edibility.color),
+                ),
+        ),
+        title: Text(species.commonName, style: const TextStyle(fontWeight: FontWeight.w700)),
+        subtitle: Text(
+          species.isCustom
+              ? 'Fiche personnelle, non vérifiée'
+              : '${species.scientificName ?? ''}\n${species.edibility.label}',
+          style: species.isCustom || species.scientificName == null
+              ? null
+              : const TextStyle(fontStyle: FontStyle.italic, fontSize: 13),
+        ),
+        isThreeLine: !species.isCustom,
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/species/${species.id}'),
       ),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () => context.push('/species/${species.id}'),
     );
   }
 }

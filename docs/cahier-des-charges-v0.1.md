@@ -78,11 +78,12 @@ Légende : 🟢 V1 · 🟡 V2 · ⚪ V3 / plus tard
 
 | ID | Fonctionnalité | Prio |
 |---|---|---|
-| MAP-1 | Afficher une carte avec la position GPS en temps réel | 🟢 |
+| MAP-1 | Carte centrée sur la position GPS en temps réel (point + cercle de précision), bouton « me recentrer » | 🟢 |
 | MAP-2 | Télécharger des zones de carte pour usage hors connexion (sélection d'une zone rectangulaire, choix du niveau de détail, affichage de la taille) | 🟢 |
 | MAP-3 | Afficher uniquement **ses propres** coins et ses sorties sur la carte | 🟢 |
 | MAP-4 | Recherche d'un lieu (en ligne ; hors ligne limité à ses propres coins) | 🟢 |
-| MAP-5 | Navigation vers un coin (ouvrir l'app de cartographie du téléphone, ou affichage distance/cap hors ligne) | 🟢 |
+| MAP-5 | **Guidage à pied vers un coin** : un clic sur un coin (liste ou carte) trace l'itinéraire par les chemins, avec consigne de la prochaine manœuvre, distance et durée restantes, recalcul si l'on s'écarte, détection d'arrivée. Sans réseau : tracé direct avec cap et distance | 🟢 |
+| MAP-8 | Liste des coins à côté de la carte (panneau déplaçable sur téléphone, colonne latérale sur grand écran), triée par distance | 🟢 |
 | MAP-6 | Fond de carte topographique/forestier (chemins, courbes de niveau) | 🟡 |
 | MAP-7 | Enregistrement d'une trace GPS pendant une sortie | 🟡 |
 
@@ -347,6 +348,7 @@ Points à trancher **[À VÉRIFIER]** avant de coder :
 |---|---|
 | Moteur de carte | `flutter_map` (raster/vectoriel simple) ou `maplibre` (vectoriel, meilleur hors ligne). |
 | Source des tuiles | Le serveur de tuiles public d'OpenStreetMap **interdit le téléchargement massif**. Il faut un fournisseur dont les conditions autorisent le **cache hors ligne et l'usage commercial**, ou héberger ses propres tuiles (format PMTiles/MBTiles) à partir de données OSM (licence ODbL, attribution obligatoire). |
+| Itinéraire à pied | Le prototype utilise le serveur public « foot » de routing.openstreetmap.de (usage léger, réseau requis). Pour un guidage **hors ligne** et une diffusion commerciale : moteur de routage embarqué (ex. données de chemins OSM prétraitées pour la zone Vosges/Alsace) ou service dont les conditions l'autorisent. À arbitrer avant publication. |
 | France | Les fonds IGN (Géoplateforme) sont une option naturelle pour le forestier/topographique ; conditions d'usage à relire. |
 | Volume | Une région complète représente des centaines de Mo ; prévoir sélection de zone, estimation de taille, gestion de l'espace. |
 

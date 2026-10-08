@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/rustic.dart';
+import '../../../core/theme.dart';
 import '../../../data/providers.dart';
 
 class JournalScreen extends ConsumerWidget {
@@ -23,34 +25,37 @@ class JournalScreen extends ConsumerWidget {
       body: outings.when(
         data: (list) {
           if (list.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: Text(
-                  'Aucune sortie pour le moment.\nAjoutez votre première sortie !',
-                  textAlign: TextAlign.center,
-                ),
-              ),
+            return const EmptyState(
+              title: 'Aucune sortie pour le moment',
+              message: 'Notez vos sorties et vos récoltes : elles resteront ici, '
+                  'même sans réseau.',
             );
           }
-          return ListView.separated(
-            padding: const EdgeInsets.only(bottom: 88),
+          return ListView.builder(
+            padding: const EdgeInsets.only(top: 12, bottom: 96),
             itemCount: list.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (context, i) {
               final o = list[i];
               final spotName = spots
                   .where((s) => s.id == o.spotId)
                   .map((s) => s.name)
                   .firstOrNull;
-              return ListTile(
-                minTileHeight: 64,
-                leading: const CircleAvatar(child: Icon(Icons.forest)),
-                title: Text(dateFormat.format(o.startedAt)),
-                subtitle: Text(spotName ?? 'Lieu non précisé'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/journal/${o.id}'),
-              );
+              return Card(
+                child: ListTile(
+                  minTileHeight: 72,
+                  leading: const CircleAvatar(
+                    backgroundColor: Palette.sage,
+                    child: Icon(Icons.forest, color: Palette.forestDark),
+                  ),
+                  title: Text(
+                    dateFormat.format(o.startedAt),
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  subtitle: Text(spotName ?? 'Lieu non précisé'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/journal/${o.id}'),
+                ),
+              ).stagger(i);
             },
           );
         },

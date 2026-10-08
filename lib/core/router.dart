@@ -12,11 +12,45 @@ import '../features/map/ui/spot_form_screen.dart';
 import '../features/species/ui/add_species_screen.dart';
 import '../features/species/ui/species_detail_screen.dart';
 import '../features/species/ui/species_list_screen.dart';
+import '../features/splash/splash_screen.dart';
 
-final router = GoRouter(
-  initialLocation: '/map',
+/// Fondu + léger glissement entre les onglets, en gardant chaque onglet vivant.
+class _FadingBranches extends StatelessWidget {
+  const _FadingBranches({required this.index, required this.children});
+
+  final int index;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+        fit: StackFit.expand,
+        children: [
+          for (var i = 0; i < children.length; i++)
+            AnimatedOpacity(
+              opacity: i == index ? 1 : 0,
+              duration: const Duration(milliseconds: 260),
+              curve: Curves.easeOut,
+              child: AnimatedSlide(
+                offset: i == index ? Offset.zero : const Offset(0, .015),
+                duration: const Duration(milliseconds: 260),
+                curve: Curves.easeOut,
+                child: IgnorePointer(
+                  ignoring: i != index,
+                  child: TickerMode(enabled: i == index, child: children[i]),
+                ),
+              ),
+            ),
+        ],
+      );
+}
+
+GoRouter buildRouter({String initialLocation = '/splash'}) => GoRouter(
+  initialLocation: initialLocation,
   routes: [
-    StatefulShellRoute.indexedStack(
+    GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
+    StatefulShellRoute(
+      navigatorContainerBuilder: (context, shell, children) =>
+          _FadingBranches(index: shell.currentIndex, children: children),
       builder: (context, state, shell) => Scaffold(
         body: shell,
         bottomNavigationBar: NavigationBar(

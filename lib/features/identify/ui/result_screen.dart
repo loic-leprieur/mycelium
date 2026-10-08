@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_animate/flutter_animate.dart';
+
+import '../../../core/rustic.dart';
 import '../../../core/safety_widgets.dart';
+import '../../../core/theme.dart';
 import '../../../data/providers.dart';
 import '../identifier.dart';
 
@@ -32,7 +36,11 @@ class ResultScreen extends ConsumerWidget {
               message: _dangerNames(ref),
               color: const Color(0xFFC62828),
               icon: Icons.dangerous,
-            ),
+            )
+                .animate()
+                .fadeIn(duration: 250.ms)
+                .then(delay: 150.ms)
+                .shake(hz: 4, duration: 600.ms, offset: const Offset(6, 0)),
           ],
           const SizedBox(height: 16),
           if (outcome.isInsufficient)
@@ -53,7 +61,7 @@ class ResultScreen extends ConsumerWidget {
               rank: i + 1,
               candidate: outcome.candidates[i],
               muted: outcome.isInsufficient,
-            ),
+            ).stagger(i + 1),
           const SizedBox(height: 16),
           const SafetyDisclaimer(),
           const SizedBox(height: 12),
@@ -107,7 +115,24 @@ class _CandidateTile extends ConsumerWidget {
                 style: const TextStyle(fontStyle: FontStyle.italic),
               ),
             const SizedBox(height: 4),
-            LinearProgressIndicator(value: candidate.score),
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: candidate.score),
+              duration: const Duration(milliseconds: 900),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, _) => ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: value,
+                  minHeight: 9,
+                  backgroundColor: Palette.sage.withValues(alpha: .5),
+                  color: muted
+                      ? Colors.grey
+                      : (species?.edibility.isDangerous ?? false)
+                          ? Palette.berry
+                          : Palette.moss,
+                ),
+              ),
+            ),
           ],
         ),
         trailing: Text(

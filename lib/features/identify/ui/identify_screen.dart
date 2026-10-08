@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_animate/flutter_animate.dart';
+
+import '../../../core/rustic.dart';
 import '../../../core/safety_widgets.dart';
+import '../../../core/theme.dart';
 import '../../../data/providers.dart';
 import '../identifier.dart';
 
@@ -45,30 +49,54 @@ class _IdentifyScreenState extends ConsumerState<IdentifyScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Identifier')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(2, 16, 2, 28),
         children: [
-          const InfoBanner(
-            title: 'MODE DÉMONSTRATION',
-            message:
-                'L\'identification réelle n\'est pas encore disponible. Les résultats '
-                'ci-dessous sont fictifs et servent uniquement à tester l\'affichage. '
-                'Ne vous y fiez jamais.',
-            color: Color(0xFFFFB74D),
+          Center(
+            child: const MushroomLogo(size: 86)
+                .animate(onPlay: (c) => c.repeat(reverse: true))
+                .moveY(begin: -4, end: 4, duration: 1700.ms, curve: Curves.easeInOut),
           ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: const InfoBanner(
+              title: 'MODE DÉMONSTRATION',
+              message:
+                  'L\'identification réelle n\'est pas encore disponible. Les résultats '
+                  'ci-dessous sont fictifs et servent uniquement à tester l\'affichage. '
+                  'Ne vous y fiez jamais.',
+              color: Color(0xFFF0B96B),
+            ),
+          ).stagger(0),
           const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: null,
-            icon: const Icon(Icons.photo_camera),
-            label: const Text('Prendre une photo (bientôt)'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: FilledButton.icon(
+              onPressed: null,
+              icon: const Icon(Icons.photo_camera),
+              label: const Text('Prendre une photo (bientôt)'),
+            ),
+          ).stagger(1),
+          const SizedBox(height: 18),
+          const LeafDivider(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 8, 18, 4),
+            child: Text('Exemples de résultats', style: theme.textTheme.titleMedium),
           ),
-          const SizedBox(height: 24),
-          Text('Exemples de résultats', style: theme.textTheme.titleMedium),
-          const SizedBox(height: 8),
           for (var i = 0; i < FakeIdentifier.scenarios.length; i++)
             Card(
               child: ListTile(
                 enabled: !_busy,
-                title: Text(FakeIdentifier.scenarios[i].label),
+                minTileHeight: 76,
+                leading: CircleAvatar(
+                  backgroundColor: Palette.sage,
+                  child: Icon(
+                    [Icons.forest, Icons.wb_sunny, Icons.warning_amber, Icons.grass][i % 4],
+                    color: Palette.forestDark,
+                  ),
+                ),
+                title: Text(FakeIdentifier.scenarios[i].label,
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
                 subtitle: Text(FakeIdentifier.scenarios[i].description),
                 trailing: _busy
                     ? const SizedBox(
@@ -76,12 +104,15 @@ class _IdentifyScreenState extends ConsumerState<IdentifyScreen> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.play_arrow),
+                    : const Icon(Icons.play_circle_outline, color: Palette.forest),
                 onTap: _busy ? null : () => _run(i),
               ),
-            ),
-          const SizedBox(height: 16),
-          const SafetyDisclaimer(),
+            ).stagger(i + 2),
+          const SizedBox(height: 14),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14),
+            child: SafetyDisclaimer(),
+          ).stagger(7),
         ],
       ),
     );
