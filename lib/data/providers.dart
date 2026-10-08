@@ -58,3 +58,25 @@ final speciesByIdProvider = Provider.family<Species?, String>((ref, id) {
   }
   return null;
 });
+
+/// Total des récoltes d'une sortie (pièces et poids), pour la liste du carnet.
+class OutingTotals {
+  const OutingTotals({this.pieces = 0, this.grams = 0});
+
+  final int pieces;
+  final int grams;
+}
+
+final outingTotalsProvider = StreamProvider<Map<String, OutingTotals>>(
+  (ref) => ref.watch(databaseProvider).watchAllHarvests().map((all) {
+    final totals = <String, OutingTotals>{};
+    for (final h in all) {
+      final t = totals[h.outingId] ?? const OutingTotals();
+      totals[h.outingId] = OutingTotals(
+        pieces: t.pieces + (h.quantityCount ?? 0),
+        grams: t.grams + (h.weightGrams ?? 0),
+      );
+    }
+    return totals;
+  }),
+);

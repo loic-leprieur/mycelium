@@ -1,0 +1,43 @@
+name: Build iOS (non signé)
+
+# Produit un fichier .ipa NON SIGNÉ à installer sur l'iPhone avec AltStore ou
+# Sideloadly (qui le signent avec un identifiant Apple gratuit). Aucun compte
+# Apple Developer payant n'est nécessaire. Voir docs/deploiement-iphone.md.
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Dépendances
+        run: flutter pub get
+
+      - name: Tests
+        run: flutter test
+
+      - name: Compilation iOS (sans signature)
+        run: flutter build ios --release --no-codesign
+
+      - name: Création de l'IPA
+        run: |
+          mkdir -p build/ipa/Payload
+          cp -R build/ios/iphoneos/Runner.app build/ipa/Payload/
+          cd build/ipa
+          zip -qr Mycelium.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mycelium-ipa
+          path: build/ipa/Mycelium.ipa
+          retention-days: 14

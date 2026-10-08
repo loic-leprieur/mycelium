@@ -397,18 +397,21 @@ class SpotTile extends StatelessWidget {
       if (distance != null) 'à ${formatDistance(distance!)}',
     ].join(' · ');
 
-    return AnimatedContainer(
-      duration: 250.ms,
-      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-      decoration: BoxDecoration(
+    // Le fond est porté par un Material (et non par une DecoratedBox) pour que
+    // l'effet d'ondulation du ListTile reste visible.
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+      child: Material(
         color: selected ? Palette.sage.withValues(alpha: .6) : Palette.paper,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: selected ? Palette.forest : Palette.bark.withValues(alpha: .18),
-          width: selected ? 2 : 1,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(
+            color: selected ? Palette.forest : Palette.bark.withValues(alpha: .18),
+            width: selected ? 2 : 1,
+          ),
         ),
-      ),
-      child: ListTile(
+        child: ListTile(
         onTap: onTap,
         minTileHeight: 68,
         leading: CircleAvatar(
@@ -431,6 +434,7 @@ class SpotTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -134,3 +134,99 @@ extension StaggerX on Widget {
       .fadeIn(duration: 380.ms)
       .slideY(begin: .14, end: 0, duration: 420.ms, curve: Curves.easeOutCubic);
 }
+
+/// Slogan de l'application (trois mots).
+const appSlogan = 'Cueillez, notez, retrouvez';
+
+/// Morille dessinée : chapeau alvéolé en ogive et pied crème.
+class MorelLogo extends StatelessWidget {
+  const MorelLogo({super.key, this.size = 150});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: size,
+        height: size,
+        child: CustomPaint(painter: _MorelPainter()),
+      );
+}
+
+class _MorelPainter extends CustomPainter {
+  static const _ridge = Color(0xFFC49A5A);
+  static const _pit = Color(0xFF4F3820);
+  static const _cap = Color(0xFF8A6A3C);
+
+  @override
+  void paint(Canvas canvas, Size s) {
+    final w = s.width;
+    final h = s.height;
+
+    // Pied (creux et légèrement évasé à la base).
+    final stem = Path()
+      ..moveTo(w * .36, h * .56)
+      ..quadraticBezierTo(w * .32, h * .80, w * .26, h * .95)
+      ..quadraticBezierTo(w * .50, h * 1.01, w * .74, h * .95)
+      ..quadraticBezierTo(w * .68, h * .80, w * .64, h * .56)
+      ..close();
+    canvas.drawPath(stem, Paint()..color = Palette.cream);
+    canvas.drawPath(
+      stem,
+      Paint()
+        ..color = Palette.bark.withValues(alpha: .6)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = w * .022,
+    );
+    // Plis du pied.
+    final fold = Paint()
+      ..color = Palette.bark.withValues(alpha: .25)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * .012;
+    canvas.drawLine(Offset(w * .46, h * .66), Offset(w * .43, h * .93), fold);
+    canvas.drawLine(Offset(w * .56, h * .66), Offset(w * .60, h * .93), fold);
+
+    // Chapeau en ogive.
+    final cap = Path()
+      ..moveTo(w * .50, h * .02)
+      ..cubicTo(w * .30, h * .04, w * .16, h * .28, w * .18, h * .52)
+      ..quadraticBezierTo(w * .19, h * .64, w * .32, h * .64)
+      ..lineTo(w * .68, h * .64)
+      ..quadraticBezierTo(w * .81, h * .64, w * .82, h * .52)
+      ..cubicTo(w * .84, h * .28, w * .70, h * .04, w * .50, h * .02)
+      ..close();
+    canvas.drawPath(cap, Paint()..color = _ridge);
+
+    // Alvéoles : rangées décalées, un peu plus petites vers la pointe.
+    canvas.save();
+    canvas.clipPath(cap);
+    final pit = Paint()..color = _pit;
+    final shade = Paint()..color = _cap;
+    const rows = 9;
+    for (var r = 0; r < rows; r++) {
+      final y = h * (.07 + r * .066);
+      final scale = .72 + .28 * (r / (rows - 1));
+      final step = w * .092 * scale;
+      final offset = r.isOdd ? step / 2 : 0.0;
+      for (var x = w * .10 - offset; x < w * .92; x += step) {
+        final jitter = ((r * 7 + (x / step).floor() * 13) % 5) / 5;
+        final pw = step * (.72 + .12 * jitter);
+        final ph = h * .052 * scale * (.9 + .2 * jitter);
+        final rect = Rect.fromCenter(center: Offset(x + step / 2, y), width: pw, height: ph);
+        canvas.drawOval(rect.translate(0, ph * .12), shade);
+        canvas.drawOval(rect, pit);
+      }
+    }
+    canvas.restore();
+
+    canvas.drawPath(
+      cap,
+      Paint()
+        ..color = _pit.withValues(alpha: .55)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = w * .022,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_MorelPainter old) => false;
+}

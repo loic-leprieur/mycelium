@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/format.dart';
 import '../../../core/rustic.dart';
 import '../../../core/theme.dart';
 import '../../../data/providers.dart';
@@ -14,6 +15,7 @@ class JournalScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final outings = ref.watch(outingsProvider);
     final spots = ref.watch(spotsProvider).value ?? const [];
+    final totals = ref.watch(outingTotalsProvider).value ?? const <String, OutingTotals>{};
     final dateFormat = DateFormat.yMMMMEEEEd('fr');
     return Scaffold(
       appBar: AppBar(title: const Text('Carnet')),
@@ -51,7 +53,7 @@ class JournalScreen extends ConsumerWidget {
                     dateFormat.format(o.startedAt),
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                  subtitle: Text(spotName ?? 'Lieu non précisé'),
+                  subtitle: Text(_subtitle(spotName, totals[o.id])),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/journal/${o.id}'),
                 ),
@@ -64,4 +66,13 @@ class JournalScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _subtitle(String? spotName, OutingTotals? totals) {
+  final parts = [
+    spotName ?? 'Lieu non précisé',
+    if (totals != null && totals.pieces > 0) formatPieces(totals.pieces),
+    if (totals != null && totals.grams > 0) formatWeight(totals.grams),
+  ];
+  return parts.join(' · ');
 }

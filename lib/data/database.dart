@@ -36,6 +36,10 @@ class Harvests extends Table {
   // Identifiant d'une espèce du catalogue ou d'une espèce personnalisée.
   TextColumn get speciesId => text()();
   IntColumn get quantityCount => integer().nullable()();
+  // Poids total de la récolte, en grammes.
+  IntColumn get weightGrams => integer().nullable()();
+  // Photo de la récolte (fichier copié dans le dossier de l'application).
+  TextColumn get photoPath => text().nullable()();
   TextColumn get notes => text().nullable()();
 
   @override
@@ -61,7 +65,18 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? driftDatabase(name: 'mycelium'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            // V2 : poids et photo des récoltes.
+            await m.addColumn(harvests, harvests.weightGrams);
+            await m.addColumn(harvests, harvests.photoPath);
+          }
+        },
+      );
 
   // --- Coins ---
   Stream<List<Spot>> watchSpots() => (select(spots)
@@ -102,6 +117,8 @@ class AppDatabase extends _$AppDatabase {
   // --- Récoltes ---
   Stream<List<Harvest>> watchHarvests(String outingId) =>
       (select(harvests)..where((t) => t.outingId.equals(outingId))).watch();
+
+  Stream<List<Harvest>> watchAllHarvests() => select(harvests).watch();
 
   Future<void> addHarvest(HarvestsCompanion harvest) =>
       into(harvests).insert(harvest);

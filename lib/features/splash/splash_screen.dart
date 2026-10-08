@@ -67,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const MushroomLogo(size: 150)
+                  const MorelLogo(size: 170)
                       .animate()
                       .scale(
                         begin: const Offset(.2, .2),
@@ -87,7 +87,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   ).animate(delay: 500.ms).fadeIn(duration: 600.ms).slideY(begin: .4, end: 0),
                   const SizedBox(height: 8),
                   Text(
-                    'Votre carnet de cueillette',
+                    appSlogan,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: Palette.sage,
                       fontStyle: FontStyle.italic,

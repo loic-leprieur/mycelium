@@ -977,6 +977,28 @@ class $HarvestsTable extends Harvests with TableInfo<$HarvestsTable, Harvest> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _weightGramsMeta = const VerificationMeta(
+    'weightGrams',
+  );
+  @override
+  late final GeneratedColumn<int> weightGrams = GeneratedColumn<int>(
+    'weight_grams',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _photoPathMeta = const VerificationMeta(
+    'photoPath',
+  );
+  @override
+  late final GeneratedColumn<String> photoPath = GeneratedColumn<String>(
+    'photo_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -992,6 +1014,8 @@ class $HarvestsTable extends Harvests with TableInfo<$HarvestsTable, Harvest> {
     outingId,
     speciesId,
     quantityCount,
+    weightGrams,
+    photoPath,
     notes,
   ];
   @override
@@ -1036,6 +1060,21 @@ class $HarvestsTable extends Harvests with TableInfo<$HarvestsTable, Harvest> {
         ),
       );
     }
+    if (data.containsKey('weight_grams')) {
+      context.handle(
+        _weightGramsMeta,
+        weightGrams.isAcceptableOrUnknown(
+          data['weight_grams']!,
+          _weightGramsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('photo_path')) {
+      context.handle(
+        _photoPathMeta,
+        photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
+      );
+    }
     if (data.containsKey('notes')) {
       context.handle(
         _notesMeta,
@@ -1067,6 +1106,14 @@ class $HarvestsTable extends Harvests with TableInfo<$HarvestsTable, Harvest> {
         DriftSqlType.int,
         data['${effectivePrefix}quantity_count'],
       ),
+      weightGrams: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}weight_grams'],
+      ),
+      photoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_path'],
+      ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -1085,12 +1132,16 @@ class Harvest extends DataClass implements Insertable<Harvest> {
   final String outingId;
   final String speciesId;
   final int? quantityCount;
+  final int? weightGrams;
+  final String? photoPath;
   final String? notes;
   const Harvest({
     required this.id,
     required this.outingId,
     required this.speciesId,
     this.quantityCount,
+    this.weightGrams,
+    this.photoPath,
     this.notes,
   });
   @override
@@ -1101,6 +1152,12 @@ class Harvest extends DataClass implements Insertable<Harvest> {
     map['species_id'] = Variable<String>(speciesId);
     if (!nullToAbsent || quantityCount != null) {
       map['quantity_count'] = Variable<int>(quantityCount);
+    }
+    if (!nullToAbsent || weightGrams != null) {
+      map['weight_grams'] = Variable<int>(weightGrams);
+    }
+    if (!nullToAbsent || photoPath != null) {
+      map['photo_path'] = Variable<String>(photoPath);
     }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
@@ -1116,6 +1173,12 @@ class Harvest extends DataClass implements Insertable<Harvest> {
       quantityCount: quantityCount == null && nullToAbsent
           ? const Value.absent()
           : Value(quantityCount),
+      weightGrams: weightGrams == null && nullToAbsent
+          ? const Value.absent()
+          : Value(weightGrams),
+      photoPath: photoPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoPath),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -1132,6 +1195,8 @@ class Harvest extends DataClass implements Insertable<Harvest> {
       outingId: serializer.fromJson<String>(json['outingId']),
       speciesId: serializer.fromJson<String>(json['speciesId']),
       quantityCount: serializer.fromJson<int?>(json['quantityCount']),
+      weightGrams: serializer.fromJson<int?>(json['weightGrams']),
+      photoPath: serializer.fromJson<String?>(json['photoPath']),
       notes: serializer.fromJson<String?>(json['notes']),
     );
   }
@@ -1143,6 +1208,8 @@ class Harvest extends DataClass implements Insertable<Harvest> {
       'outingId': serializer.toJson<String>(outingId),
       'speciesId': serializer.toJson<String>(speciesId),
       'quantityCount': serializer.toJson<int?>(quantityCount),
+      'weightGrams': serializer.toJson<int?>(weightGrams),
+      'photoPath': serializer.toJson<String?>(photoPath),
       'notes': serializer.toJson<String?>(notes),
     };
   }
@@ -1152,6 +1219,8 @@ class Harvest extends DataClass implements Insertable<Harvest> {
     String? outingId,
     String? speciesId,
     Value<int?> quantityCount = const Value.absent(),
+    Value<int?> weightGrams = const Value.absent(),
+    Value<String?> photoPath = const Value.absent(),
     Value<String?> notes = const Value.absent(),
   }) => Harvest(
     id: id ?? this.id,
@@ -1160,6 +1229,8 @@ class Harvest extends DataClass implements Insertable<Harvest> {
     quantityCount: quantityCount.present
         ? quantityCount.value
         : this.quantityCount,
+    weightGrams: weightGrams.present ? weightGrams.value : this.weightGrams,
+    photoPath: photoPath.present ? photoPath.value : this.photoPath,
     notes: notes.present ? notes.value : this.notes,
   );
   Harvest copyWithCompanion(HarvestsCompanion data) {
@@ -1170,6 +1241,10 @@ class Harvest extends DataClass implements Insertable<Harvest> {
       quantityCount: data.quantityCount.present
           ? data.quantityCount.value
           : this.quantityCount,
+      weightGrams: data.weightGrams.present
+          ? data.weightGrams.value
+          : this.weightGrams,
+      photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
       notes: data.notes.present ? data.notes.value : this.notes,
     );
   }
@@ -1181,14 +1256,23 @@ class Harvest extends DataClass implements Insertable<Harvest> {
           ..write('outingId: $outingId, ')
           ..write('speciesId: $speciesId, ')
           ..write('quantityCount: $quantityCount, ')
+          ..write('weightGrams: $weightGrams, ')
+          ..write('photoPath: $photoPath, ')
           ..write('notes: $notes')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, outingId, speciesId, quantityCount, notes);
+  int get hashCode => Object.hash(
+    id,
+    outingId,
+    speciesId,
+    quantityCount,
+    weightGrams,
+    photoPath,
+    notes,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1197,6 +1281,8 @@ class Harvest extends DataClass implements Insertable<Harvest> {
           other.outingId == this.outingId &&
           other.speciesId == this.speciesId &&
           other.quantityCount == this.quantityCount &&
+          other.weightGrams == this.weightGrams &&
+          other.photoPath == this.photoPath &&
           other.notes == this.notes);
 }
 
@@ -1205,6 +1291,8 @@ class HarvestsCompanion extends UpdateCompanion<Harvest> {
   final Value<String> outingId;
   final Value<String> speciesId;
   final Value<int?> quantityCount;
+  final Value<int?> weightGrams;
+  final Value<String?> photoPath;
   final Value<String?> notes;
   final Value<int> rowid;
   const HarvestsCompanion({
@@ -1212,6 +1300,8 @@ class HarvestsCompanion extends UpdateCompanion<Harvest> {
     this.outingId = const Value.absent(),
     this.speciesId = const Value.absent(),
     this.quantityCount = const Value.absent(),
+    this.weightGrams = const Value.absent(),
+    this.photoPath = const Value.absent(),
     this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1220,6 +1310,8 @@ class HarvestsCompanion extends UpdateCompanion<Harvest> {
     required String outingId,
     required String speciesId,
     this.quantityCount = const Value.absent(),
+    this.weightGrams = const Value.absent(),
+    this.photoPath = const Value.absent(),
     this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -1230,6 +1322,8 @@ class HarvestsCompanion extends UpdateCompanion<Harvest> {
     Expression<String>? outingId,
     Expression<String>? speciesId,
     Expression<int>? quantityCount,
+    Expression<int>? weightGrams,
+    Expression<String>? photoPath,
     Expression<String>? notes,
     Expression<int>? rowid,
   }) {
@@ -1238,6 +1332,8 @@ class HarvestsCompanion extends UpdateCompanion<Harvest> {
       if (outingId != null) 'outing_id': outingId,
       if (speciesId != null) 'species_id': speciesId,
       if (quantityCount != null) 'quantity_count': quantityCount,
+      if (weightGrams != null) 'weight_grams': weightGrams,
+      if (photoPath != null) 'photo_path': photoPath,
       if (notes != null) 'notes': notes,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1248,6 +1344,8 @@ class HarvestsCompanion extends UpdateCompanion<Harvest> {
     Value<String>? outingId,
     Value<String>? speciesId,
     Value<int?>? quantityCount,
+    Value<int?>? weightGrams,
+    Value<String?>? photoPath,
     Value<String?>? notes,
     Value<int>? rowid,
   }) {
@@ -1256,6 +1354,8 @@ class HarvestsCompanion extends UpdateCompanion<Harvest> {
       outingId: outingId ?? this.outingId,
       speciesId: speciesId ?? this.speciesId,
       quantityCount: quantityCount ?? this.quantityCount,
+      weightGrams: weightGrams ?? this.weightGrams,
+      photoPath: photoPath ?? this.photoPath,
       notes: notes ?? this.notes,
       rowid: rowid ?? this.rowid,
     );
@@ -1276,6 +1376,12 @@ class HarvestsCompanion extends UpdateCompanion<Harvest> {
     if (quantityCount.present) {
       map['quantity_count'] = Variable<int>(quantityCount.value);
     }
+    if (weightGrams.present) {
+      map['weight_grams'] = Variable<int>(weightGrams.value);
+    }
+    if (photoPath.present) {
+      map['photo_path'] = Variable<String>(photoPath.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -1292,6 +1398,8 @@ class HarvestsCompanion extends UpdateCompanion<Harvest> {
           ..write('outingId: $outingId, ')
           ..write('speciesId: $speciesId, ')
           ..write('quantityCount: $quantityCount, ')
+          ..write('weightGrams: $weightGrams, ')
+          ..write('photoPath: $photoPath, ')
           ..write('notes: $notes, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -2176,6 +2284,8 @@ typedef $$HarvestsTableCreateCompanionBuilder = HarvestsCompanion Function({
   required String outingId,
   required String speciesId,
   Value<int?> quantityCount,
+  Value<int?> weightGrams,
+  Value<String?> photoPath,
   Value<String?> notes,
   Value<int> rowid,
 });
@@ -2184,6 +2294,8 @@ typedef $$HarvestsTableUpdateCompanionBuilder = HarvestsCompanion Function({
   Value<String> outingId,
   Value<String> speciesId,
   Value<int?> quantityCount,
+  Value<int?> weightGrams,
+  Value<String?> photoPath,
   Value<String?> notes,
   Value<int> rowid,
 });
@@ -2214,6 +2326,16 @@ class $$HarvestsTableFilterComposer
 
   ColumnFilters<int> get quantityCount => $composableBuilder(
     column: $table.quantityCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get weightGrams => $composableBuilder(
+    column: $table.weightGrams,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2252,6 +2374,16 @@ class $$HarvestsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get weightGrams => $composableBuilder(
+    column: $table.weightGrams,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get notes => $composableBuilder(
     column: $table.notes,
     builder: (column) => ColumnOrderings(column),
@@ -2280,6 +2412,14 @@ class $$HarvestsTableAnnotationComposer
     column: $table.quantityCount,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get weightGrams => $composableBuilder(
+    column: $table.weightGrams,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get photoPath =>
+      $composableBuilder(column: $table.photoPath, builder: (column) => column);
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
@@ -2317,6 +2457,8 @@ class $$HarvestsTableTableManager
                 Value<String> outingId = const Value.absent(),
                 Value<String> speciesId = const Value.absent(),
                 Value<int?> quantityCount = const Value.absent(),
+                Value<int?> weightGrams = const Value.absent(),
+                Value<String?> photoPath = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => HarvestsCompanion(
@@ -2324,6 +2466,8 @@ class $$HarvestsTableTableManager
                 outingId: outingId,
                 speciesId: speciesId,
                 quantityCount: quantityCount,
+                weightGrams: weightGrams,
+                photoPath: photoPath,
                 notes: notes,
                 rowid: rowid,
               ),
@@ -2333,6 +2477,8 @@ class $$HarvestsTableTableManager
                 required String outingId,
                 required String speciesId,
                 Value<int?> quantityCount = const Value.absent(),
+                Value<int?> weightGrams = const Value.absent(),
+                Value<String?> photoPath = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => HarvestsCompanion.insert(
@@ -2340,6 +2486,8 @@ class $$HarvestsTableTableManager
                 outingId: outingId,
                 speciesId: speciesId,
                 quantityCount: quantityCount,
+                weightGrams: weightGrams,
+                photoPath: photoPath,
                 notes: notes,
                 rowid: rowid,
               ),
