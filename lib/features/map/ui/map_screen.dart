@@ -37,6 +37,7 @@ class _MapScreenState extends ConsumerState<MapScreen>
 
   bool _mapReady = false;
   bool _centeredOnUser = false;
+  int _fittedVersion = -1;
   LatLng _from = _defaultCenter;
   LatLng _to = _defaultCenter;
   double _zoomFrom = 9;
@@ -83,14 +84,12 @@ class _MapScreenState extends ConsumerState<MapScreen>
     _anim.forward(from: 0);
   }
 
-  void _fitRoute(NavState nav) {
-    final route = nav.route;
-    if (!_mapReady || route == null) return;
-    final user = ref.read(locationProvider).value?.latLng;
-    final pts = [...route.points, ?user];
+  /// Recadre la carte pour voir à la fois vous et le coin.
+  void _fitGuidance(NavState nav) {
+    if (!_mapReady || nav.line.isEmpty) return;
     final size = MediaQuery.sizeOf(context);
     final camera = CameraFit.coordinates(
-      coordinates: pts,
+      coordinates: nav.line,
       padding: EdgeInsets.fromLTRB(48, 190, 48, size.height * .48),
       maxZoom: 17,
     ).fit(_controller.camera);
@@ -167,8 +166,10 @@ class _MapScreenState extends ConsumerState<MapScreen>
       }
     });
     ref.listen<NavState>(navigationProvider, (prev, next) {
-      if (next.route != null && prev?.routeVersion != next.routeVersion) {
-        _fitRoute(next);
+      // Recadrage une seule fois par guidage, dès que la position est connue.
+      if (next.active && next.user != null && _fittedVersion != next.startVersion) {
+        _fittedVersion = next.startVersion;
+        _fitGuidance(next);
       }
     });
 
@@ -331,7 +332,7 @@ class _MapScreenState extends ConsumerState<MapScreen>
   ) {
     final here = location.value?.latLng;
     final accuracy = location.value?.position?.accuracy;
-    final route = nav.route;
+    final line = nav.line;
 
     return Stack(
       children: [
@@ -372,18 +373,17 @@ class _MapScreenState extends ConsumerState<MapScreen>
                 child: tile,
               ),
             ),
-            if (route != null)
+            // Guidage à vol d'oiseau : droite en pointillés entre vous et le coin.
+            if (line.isNotEmpty)
               PolylineLayer(
                 polylines: [
                   Polyline(
-                    points: route.points,
-                    strokeWidth: 7,
-                    color: route.isStraightLine ? Palette.bark : Palette.forest,
-                    borderStrokeWidth: 3,
+                    points: line,
+                    strokeWidth: 5,
+                    color: Palette.berry,
+                    borderStrokeWidth: 2.5,
                     borderColor: Colors.white,
-                    pattern: route.isStraightLine
-                        ? StrokePattern.dashed(segments: const [12, 9])
-                        : const StrokePattern.solid(),
+                    pattern: StrokePattern.dashed(segments: const [14, 10]),
                   ),
                 ],
               ),
@@ -415,6 +415,16 @@ class _MapScreenState extends ConsumerState<MapScreen>
                         child: SpotPin(spot: s, selected: nav.target?.id == s.id),
                       ),
                     ),
+                  ),
+                if (line.length == 2 && !nav.arrived)
+                  Marker(
+                    point: LatLng(
+                      (line[0].latitude + line[1].latitude) / 2,
+                      (line[0].longitude + line[1].longitude) / 2,
+                    ),
+                    width: 96,
+                    height: 34,
+                    child: IgnorePointer(child: DistanceTag(meters: nav.distance ?? 0)),
                   ),
                 if (here != null)
                   Marker(

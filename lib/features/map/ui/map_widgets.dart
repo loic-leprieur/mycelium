@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -146,33 +148,83 @@ class LocationBanner extends StatelessWidget {
   }
 }
 
-/// Consigne de guidage en haut de la carte (« Dans 120 m, tournez à gauche »).
+/// Étiquette de distance posée au milieu du trait « à vol d'oiseau ».
+class DistanceTag extends StatelessWidget {
+  const DistanceTag({super.key, required this.meters});
+
+  final double meters;
+
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: Palette.berry,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white, width: 2),
+            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
+          ),
+          child: Text(
+            formatDistance(meters),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      );
+}
+
+/// Indication de direction en haut de la carte : flèche vers le coin, cap,
+/// distance à vol d'oiseau. La flèche suit votre direction de marche quand vous
+/// avancez ; à l'arrêt elle indique le cap absolu (carte orientée nord).
 class InstructionBanner extends StatelessWidget {
   const InstructionBanner({super.key, required this.nav});
 
   final NavState nav;
 
+  static String _hint(double angle) {
+    final a = angle.abs();
+    if (a < 15) return 'Droit devant';
+    final side = angle < 0 ? 'gauche' : 'droite';
+    if (a < 60) return 'Un peu à $side';
+    if (a < 120) return 'À $side';
+    if (a < 165) return 'Derrière, à $side';
+    return 'Faites demi-tour';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final step = nav.nextStep;
+    final bearing = nav.bearing;
+    final distance = nav.distance;
 
-    IconData icon = Icons.hourglass_top;
-    String title = 'Calcul de l\'itinéraire…';
+    String title;
     String? subtitle;
+    Widget arrow;
 
     if (nav.arrived) {
-      icon = Icons.flag_circle;
       title = 'Vous êtes arrivé !';
       subtitle = nav.target?.name;
-    } else if (nav.route == null && !nav.loading) {
-      icon = Icons.gps_not_fixed;
+      arrow = const Icon(Icons.flag_circle, color: Palette.chanterelle, size: 44);
+    } else if (bearing == null || distance == null) {
       title = 'En attente de votre position…';
-    } else if (step != null) {
-      icon = step.icon;
-      final d = nav.distanceToNext;
-      title = step.instruction;
-      subtitle = d == null ? null : 'Dans ${formatDistance(d)}';
+      arrow = const Icon(Icons.gps_not_fixed, color: Palette.chanterelle, size: 40);
+    } else {
+      final relative = nav.relativeAngle;
+      // Rotation de la flèche : relative si on avance, absolue sinon.
+      final angle = (relative ?? bearing) * math.pi / 180;
+      title = relative != null
+          ? _hint(relative)
+          : 'Cap ${cardinal(bearing)} (${bearing.round()}°)';
+      subtitle = '${formatDistance(distance)} à vol d\'oiseau';
+      arrow = AnimatedRotation(
+        turns: angle / (2 * math.pi),
+        duration: 400.ms,
+        curve: Curves.easeOut,
+        child: const Icon(Icons.navigation, color: Palette.chanterelle, size: 44),
+      );
     }
 
     return Material(
@@ -183,11 +235,7 @@ class InstructionBanner extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
-            AnimatedSwitcher(
-              duration: 300.ms,
-              transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
-              child: Icon(icon, key: ValueKey(icon), color: Palette.chanterelle, size: 40),
-            ),
+            arrow,
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -208,12 +256,6 @@ class InstructionBanner extends StatelessWidget {
                 ],
               ),
             ),
-            if (nav.rerouting)
-              const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Palette.cream),
-              ),
           ],
         ),
       ),
@@ -221,7 +263,7 @@ class InstructionBanner extends StatelessWidget {
   }
 }
 
-/// Résumé du trajet affiché dans le panneau : distance, durée, arrêt.
+/// Résumé du guidage affiché dans le panneau : distance, durée, arrêt.
 class NavigationSummary extends StatelessWidget {
   const NavigationSummary({
     super.key,
@@ -238,8 +280,8 @@ class NavigationSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final spot = nav.target!;
-    final remaining = nav.remaining ?? nav.route?.distance;
-    final seconds = nav.remainingSeconds ?? nav.route?.duration;
+    final distance = nav.distance;
+    final seconds = nav.seconds;
 
     return Card(
       color: Palette.sage.withValues(alpha: .55),
@@ -250,7 +292,7 @@ class NavigationSummary extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.directions_walk, color: Palette.forestDark),
+                const Icon(Icons.explore, color: Palette.forestDark),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -268,27 +310,26 @@ class NavigationSummary extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            if (nav.loading)
-              const LinearProgressIndicator()
-            else if (remaining != null)
+            if (nav.waitingForPosition)
+              const Text('En attente de votre position GPS…')
+            else if (distance != null)
               Wrap(
                 spacing: 28,
                 runSpacing: 6,
                 children: [
-                  _Figure(label: 'Distance', value: formatDistance(remaining)),
+                  _Figure(label: 'Distance', value: formatDistance(distance)),
                   if (seconds != null)
-                    _Figure(label: 'À pied', value: formatDuration(seconds)),
+                    _Figure(label: 'À pied (≈)', value: formatDuration(seconds)),
                 ],
               ),
-            if (nav.route?.isStraightLine ?? false)
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Text(
-                  'Tracé direct : l\'itinéraire par les chemins n\'est pas disponible '
-                  '(pas de connexion). Suivez la direction indiquée.',
-                  style: TextStyle(fontSize: 13),
-                ),
+            const Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: Text(
+                'Guidage à vol d\'oiseau : suivez la direction indiquée. En forêt, '
+                'le terrain peut imposer des détours.',
+                style: TextStyle(fontSize: 13),
               ),
+            ),
             const SizedBox(height: 10),
             SizedBox(
               width: double.infinity,

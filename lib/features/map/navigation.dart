@@ -1,189 +1,136 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../data/database.dart';
 import 'geo.dart';
 import 'location.dart';
-import 'routing.dart';
 
-/// État du guidage vers un coin.
+/// Allure moyenne en forêt (m/s) : plus lente que sur route (≈ 4 km/h).
+const forestWalkingSpeed = 1.1;
+
+/// Rayon (m) en dessous duquel on considère être arrivé au coin.
+const arrivalRadius = 20.0;
+
+/// Guidage « à vol d'oiseau » vers un coin.
+///
+/// En forêt il n'y a ni rue ni chemin cartographié : on ne calcule donc pas
+/// d'itinéraire, on indique la direction (cap), la distance en ligne droite et
+/// une durée estimée, recalculés à chaque position GPS. Fonctionne sans réseau.
 class NavState {
   const NavState({
     this.target,
-    this.route,
-    this.loading = false,
+    this.user,
+    this.heading,
     this.arrived = false,
-    this.remaining,
-    this.nextStep,
-    this.distanceToNext,
-    this.rerouting = false,
-    this.routeVersion = 0,
+    this.startVersion = 0,
   });
 
   final Spot? target;
-  final WalkingRoute? route;
-  final bool loading;
+  final LatLng? user;
+
+  /// Direction de marche (°, 0 = nord), connue seulement quand on avance.
+  final double? heading;
   final bool arrived;
 
-  /// Distance restante (m) jusqu'au coin.
-  final double? remaining;
-  final RouteStep? nextStep;
-  final double? distanceToNext;
-  final bool rerouting;
-
-  /// Incrémenté à chaque nouveau tracé : la carte s'y recadre.
-  final int routeVersion;
+  /// Incrémenté à chaque nouveau guidage : la carte se recadre dessus.
+  final int startVersion;
 
   bool get active => target != null;
+  bool get waitingForPosition => active && user == null;
 
-  double? get remainingSeconds {
-    final r = route;
-    final rem = remaining;
-    if (r == null || rem == null || r.distance == 0) return null;
-    return r.duration * (rem / r.distance);
+  LatLng? get destination =>
+      target == null ? null : LatLng(target!.latitude, target!.longitude);
+
+  /// Distance en ligne droite (m).
+  double? get distance {
+    final u = user;
+    final d = destination;
+    if (u == null || d == null) return null;
+    return metersBetween(u, d);
+  }
+
+  /// Cap absolu vers le coin (°, 0 = nord).
+  double? get bearing {
+    final u = user;
+    final d = destination;
+    if (u == null || d == null) return null;
+    return bearingBetween(u, d);
+  }
+
+  /// Angle (−180…180°) entre la direction de marche et le coin :
+  /// négatif = à gauche, positif = à droite. Nul si on ne bouge pas.
+  double? get relativeAngle {
+    final b = bearing;
+    final h = heading;
+    if (b == null || h == null) return null;
+    var diff = (b - h) % 360;
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+    return diff;
+  }
+
+  /// Durée estimée (s) à l'allure de marche en forêt.
+  double? get seconds {
+    final d = distance;
+    return d == null ? null : d / forestWalkingSpeed;
+  }
+
+  /// Segment à tracer sur la carte : de vous au coin.
+  List<LatLng> get line {
+    final u = user;
+    final d = destination;
+    return (u == null || d == null) ? const [] : [u, d];
   }
 
   NavState copyWith({
-    WalkingRoute? route,
-    bool? loading,
+    LatLng? user,
+    double? heading,
+    bool clearHeading = false,
     bool? arrived,
-    double? remaining,
-    RouteStep? nextStep,
-    double? distanceToNext,
-    bool? rerouting,
-    int? routeVersion,
   }) =>
       NavState(
         target: target,
-        route: route ?? this.route,
-        loading: loading ?? this.loading,
+        user: user ?? this.user,
+        heading: clearHeading ? null : (heading ?? this.heading),
         arrived: arrived ?? this.arrived,
-        remaining: remaining ?? this.remaining,
-        nextStep: nextStep ?? this.nextStep,
-        distanceToNext: distanceToNext ?? this.distanceToNext,
-        rerouting: rerouting ?? this.rerouting,
-        routeVersion: routeVersion ?? this.routeVersion,
+        startVersion: startVersion,
       );
 }
 
-final routingServiceProvider = Provider<RoutingService>((ref) => RoutingService());
-
-/// Guidage à pied : calcule l'itinéraire, le suit avec le GPS et recalcule si
-/// l'utilisateur s'écarte du tracé.
 class NavigationController extends Notifier<NavState> {
-  static const _arrivalRadius = 25.0;
-  static const _offRouteRadius = 45.0;
-  static const _rerouteCooldown = Duration(seconds: 20);
-
-  int _token = 0;
-  DateTime _lastFetch = DateTime.fromMillisecondsSinceEpoch(0);
-
   @override
   NavState build() {
     ref.listen<AsyncValue<LocationState>>(locationProvider, (_, next) {
-      final here = next.value?.latLng;
-      if (here != null) _onPosition(here);
+      final value = next.value;
+      if (value?.position != null) _onPosition(value!.position!);
     });
     return const NavState();
   }
 
-  Future<void> start(Spot spot) async {
-    _token++;
-    _lastFetch = DateTime.fromMillisecondsSinceEpoch(0);
-    state = NavState(target: spot, loading: true);
-    final here = ref.read(locationProvider).value?.latLng;
-    if (here != null) {
-      await _fetch(here);
-    }
+  void start(Spot spot) {
+    final position = ref.read(locationProvider).value?.position;
+    state = NavState(target: spot, startVersion: state.startVersion + 1);
+    if (position != null) _onPosition(position);
   }
 
-  void stop() {
-    _token++;
-    state = const NavState();
-  }
+  void stop() => state = NavState(startVersion: state.startVersion);
 
-  Future<void> _fetch(LatLng here) async {
-    final target = state.target;
-    if (target == null) return;
-    final token = ++_token;
-    _lastFetch = DateTime.now();
-    final wasRoute = state.route != null;
-    state = state.copyWith(loading: !wasRoute, rerouting: wasRoute);
+  void _onPosition(Position position) {
+    if (!state.active) return;
+    final here = LatLng(position.latitude, position.longitude);
 
-    final route = await ref
-        .read(routingServiceProvider)
-        .walkingRoute(here, LatLng(target.latitude, target.longitude));
-    if (token != _token || state.target?.id != target.id) return;
+    // Le cap GPS n'a de sens qu'en mouvement.
+    final moving = position.speed >= 0.6 && position.heading >= 0;
 
-    // La carte ne se recadre que pour un premier tracé ou un changement de type
-    // (direct <-> réel), pas à chaque recalcul.
-    final previous = state.route;
-    final reframe = previous == null || previous.isStraightLine != route.isStraightLine;
-    state = state.copyWith(
-      route: route,
-      loading: false,
-      rerouting: false,
-      arrived: false,
-      routeVersion: reframe ? state.routeVersion + 1 : state.routeVersion,
+    var next = state.copyWith(
+      user: here,
+      heading: moving ? position.heading : null,
+      clearHeading: !moving,
     );
-    _onPosition(here);
-  }
-
-  void _onPosition(LatLng here) {
-    final target = state.target;
-    if (target == null) return;
-
-    final destination = LatLng(target.latitude, target.longitude);
-    final route = state.route;
-
-    if (route == null) {
-      if (!state.loading || DateTime.now().difference(_lastFetch) > _rerouteCooldown) {
-        // Première position obtenue après le démarrage, ou nouvel essai.
-        _fetch(here);
-      }
-      return;
-    }
-
-    if (metersBetween(here, destination) <= _arrivalRadius) {
-      state = state.copyWith(arrived: true, remaining: 0);
-      return;
-    }
-
-    final projection = projectOnRoute(here, route.points, route.cumulative);
-    final remaining = (route.distance - projection.along).clamp(0.0, double.infinity);
-
-    // Prochaine manœuvre : première étape dont le départ est devant nous.
-    var cumulative = 0.0;
-    RouteStep? next;
-    double? distanceToNext;
-    for (var i = 0; i < route.steps.length; i++) {
-      if (i > 0 && cumulative > projection.along + 5) {
-        next = route.steps[i];
-        distanceToNext = cumulative - projection.along;
-        break;
-      }
-      cumulative += route.steps[i].distance;
-    }
-    next ??= route.steps.isEmpty ? null : route.steps.last;
-    distanceToNext ??= remaining;
-
-    state = state.copyWith(
-      arrived: false,
-      remaining: remaining,
-      nextStep: next,
-      distanceToNext: distanceToNext,
-    );
-
-    final offRoute = projection.offRoute > _offRouteRadius;
-    if (offRoute &&
-        !route.isStraightLine &&
-        DateTime.now().difference(_lastFetch) > _rerouteCooldown) {
-      _fetch(here);
-    } else if (route.isStraightLine &&
-        DateTime.now().difference(_lastFetch) > const Duration(seconds: 60)) {
-      // Réessaie régulièrement d'obtenir un vrai itinéraire.
-      _fetch(here);
-    }
+    final d = next.distance;
+    if (d != null) next = next.copyWith(arrived: d <= arrivalRadius);
+    state = next;
   }
 }
 
