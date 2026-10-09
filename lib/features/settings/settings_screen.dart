@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-
 /// Réglages : point d'entrée des sous-écrans. Chaque sous-écran est tenu par son
 /// propre module (`settings/data`, `safety`).
 class SettingsScreen extends StatelessWidget {
@@ -35,6 +34,20 @@ class SettingsScreen extends StatelessWidget {
               subtitle: const Text('Numéros d\'urgence, consultable hors ligne'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push('/settings/safety'),
+            ),
+            ListTile(
+              minTileHeight: 72,
+              leading: const Icon(Icons.description_outlined),
+              title: const Text('Licences'),
+              subtitle: const Text('Licence de l\'application et composants tiers'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => showLicensePage(
+                context: context,
+                applicationName: 'Mycelium',
+                applicationVersion: '1.0.0',
+                applicationLegalese: '© 2026 Loïc Leprieur. Tous droits réservés.\n'
+                    'Cartes © contributeurs OpenStreetMap (ODbL).',
+              ),
             ),
           ],
         ),
