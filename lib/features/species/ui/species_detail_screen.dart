@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/rustic.dart';
 import '../../../core/safety_widgets.dart';
+import '../../../core/theme.dart';
 import '../../../data/providers.dart';
 
 class SpeciesDetailScreen extends ConsumerWidget {
@@ -117,6 +118,19 @@ class SpeciesDetailScreen extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(species.edibilityNote!),
+                  ),
+                if (species.edibility.isDangerous)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push('/settings/safety'),
+                      icon: const Icon(Icons.health_and_safety_outlined),
+                      label: const Text('Intoxication : que faire ?'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Palette.berry,
+                        side: const BorderSide(color: Palette.berry, width: 1.5),
+                      ),
+                    ),
                   ),
               ],
             ).stagger(1),

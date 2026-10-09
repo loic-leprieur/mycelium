@@ -1,5 +1,6 @@
 import '../species/data/species_seed.dart';
 import '../species/domain/species.dart';
+import 'analysis/photo_quality.dart';
 
 /// Une espèce proposée par un moteur d'identification, avec son score (0–1).
 class Candidate {
@@ -62,7 +63,20 @@ class IdentificationOutcome {
     this.imagePath,
     this.latitude,
     this.longitude,
+    this.quality,
+    this.seasonMonth,
+    this.photoCount = 1,
   });
+
+  /// Qualité de la photo principale (ID-8), null si non mesurée.
+  final QualityReport? quality;
+
+  /// Mois (1–12) de la prise de vue, connu seulement avec l'appareil photo
+  /// (ID-7) : null pour une photo de la galerie, qui peut dater d'un autre mois.
+  final int? seasonMonth;
+
+  /// Nombre de photos combinées dans ce résultat (ID-6).
+  final int photoCount;
 
   /// Top 5, triés par score décroissant.
   final List<Candidate> candidates;
@@ -109,6 +123,10 @@ IdentificationOutcome applySafetyRules(
   String? imagePath,
   double? latitude,
   double? longitude,
+  QualityReport? quality,
+  int? seasonMonth,
+  int photoCount = 1,
+  Iterable<String> extraDangerousSpeciesIds = const [],
 }) {
   final sorted = [...raw]..sort((a, b) => b.score.compareTo(a.score));
   final top5 = [
@@ -131,6 +149,10 @@ IdentificationOutcome applySafetyRules(
     for (final c in top5)
       if (edibilityOf(c.speciesId)?.isDangerous ?? false) c.speciesId,
   ];
+  // RM-6 : une alerte levée par une photo seule (multi-photos) n'est jamais effacée.
+  for (final id in extraDangerousSpeciesIds) {
+    if (!dangerous.contains(id)) dangerous.add(id);
+  }
 
   return IdentificationOutcome(
     candidates: top5,
@@ -143,6 +165,9 @@ IdentificationOutcome applySafetyRules(
     imagePath: imagePath,
     latitude: latitude,
     longitude: longitude,
+    quality: quality,
+    seasonMonth: seasonMonth,
+    photoCount: photoCount,
   );
 }
 
@@ -161,6 +186,16 @@ abstract class Identifier {
   bool get isDemo;
 
   Future<RawIdentification> identify(IdentificationInput input);
+}
+
+/// Moteur qui décrit une photo par un vecteur : seul à pouvoir combiner
+/// plusieurs photos en un résultat (ID-6, voir `analysis/multi_photo.dart`).
+abstract interface class EmbeddingIdentifier implements Identifier {
+  /// Vecteur décrivant la photo.
+  Future<List<double>> embed(String imagePath);
+
+  /// Scores d'un vecteur (une photo, ou plusieurs photos fusionnées).
+  RawIdentification classify(List<double> embedding);
 }
 
 /// Scénario prédéfini du moteur de démonstration.

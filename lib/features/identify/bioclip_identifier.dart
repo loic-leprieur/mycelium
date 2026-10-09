@@ -15,7 +15,7 @@ import 'image_preprocess.dart';
 /// 512 nombres par le modèle, puis comparée aux vecteurs précalculés des
 /// espèces (voir [ClassBank]). Le modèle et ses classes sont produits par
 /// `tools/bioclip/export_bioclip.py` dans `assets/models/`.
-class BioClipIdentifier implements Identifier {
+class BioClipIdentifier implements EmbeddingIdentifier {
   BioClipIdentifier._(this._session, this.bank);
 
   static const modelAsset = 'assets/models/bioclip_visual.onnx';
@@ -51,6 +51,7 @@ class BioClipIdentifier implements Identifier {
   bool get isDemo => false;
 
   /// Vecteur de 512 nombres (normalisé) décrivant la photo.
+  @override
   Future<List<double>> embed(String imagePath) async {
     final size = bank.inputSize;
     final mean = bank.mean ?? clipMean;
@@ -80,6 +81,9 @@ class BioClipIdentifier implements Identifier {
     if (path == null) throw ArgumentError('Aucune photo à analyser.');
     return bank.score(await embed(path));
   }
+
+  @override
+  RawIdentification classify(List<double> embedding) => bank.score(embedding);
 
   Future<void> dispose() => _session.close();
 }

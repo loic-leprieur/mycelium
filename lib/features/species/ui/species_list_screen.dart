@@ -12,7 +12,6 @@ import '../domain/species_groups.dart';
 import 'danger_badge.dart';
 import 'deadly_section.dart';
 import 'filters/filters_panel.dart';
-import 'filters/habitat_families.dart';
 import 'filters/species_filters.dart';
 
 /// Horloge de l'encyclopédie, pour « En saison ce mois-ci ». Remplaçable dans les tests.

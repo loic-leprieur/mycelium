@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +11,6 @@ import 'package:latlong2/latlong.dart';
 import '../../../core/rustic.dart';
 import '../../../core/safety_widgets.dart';
 import '../../../core/theme.dart';
-import '../../../data/database.dart';
 import '../../../data/photo_store.dart';
 import '../../../data/providers.dart';
 import '../../journal/ui/harvest_form_sheet.dart';
@@ -99,7 +99,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
 
   /// Feuille « Où l'avez-vous trouvé ? » (null = l'utilisateur a renoncé).
   Future<PlaceChoice?> _askPlace(String speciesId) async {
-    final spots = await ref.read(spotsProvider.future);
+    final db = ref.read(databaseProvider);
+    final spots = await db.select(db.spots).get();
     if (!mounted) return null;
     final lat = outcome.latitude;
     final lon = outcome.longitude;
@@ -123,11 +124,15 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   /// Propose d'ajouter l'espèce retenue à une sortie, comme récolte (LOG-2).
   /// [photoPath] est un chemin ABSOLU : le formulaire de récolte copie la photo.
   Future<void> _offerHarvest(String speciesId, String photoPath) async {
-    final outings = ref.read(outingsProvider).value ?? const <Outing>[];
+    final db = ref.read(databaseProvider);
+    final outings = await (db.select(db.outings)
+          ..orderBy([(t) => OrderingTerm.desc(t.startedAt)]))
+        .get();
+    final spotRows = await db.select(db.spots).get();
     if (outings.isEmpty || !mounted) return;
-    final spots = {
-      for (final s in ref.read(spotsProvider).value ?? const <Spot>[]) s.id: s.name,
-    };
+    // La notification d'enregistrement masquerait le bas de la feuille.
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    final spots = {for (final s in spotRows) s.id: s.name};
     final outingId = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,

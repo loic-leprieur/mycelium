@@ -110,6 +110,13 @@ Future<void> runSpeciesFlow(WidgetTester t) async {
     of: find.byType(SpeciesListScreen),
     matching: find.byType(TextField),
   );
+  final list = find.descendant(
+    of: find.byType(SpeciesListScreen),
+    matching: find.byType(CustomScrollView),
+  );
+
+  // Liste complète : la rubrique des espèces mortelles est en tête.
+  expect(find.text('Espèces mortelles à connaître'), findsOneWidget);
 
   await t.enterText(search, 'cèpe');
   await settle(t);
@@ -143,6 +150,17 @@ Future<void> runSpeciesFlow(WidgetTester t) async {
   await settle(t);
   expect(find.widgetWithText(ListTile, 'Trompette test'), findsOneWidget);
   expect(find.text('Fiche personnelle, non vérifiée'), findsOneWidget);
+
+  // Filtres : « Mortel » ne garde que les espèces mortelles, puis réinitialisation.
+  await t.enterText(search, '');
+  await settle(t);
+  await tapRevealed(t, find.textContaining('Filtres'), inside: list);
+  await tapRevealed(t, find.widgetWithText(FilterChip, 'Mortel'), inside: list);
+  await reveal(t, find.text('4 espèces sur 22'), inside: list);
+  expect(find.text('4 espèces sur 22'), findsOneWidget);
+  expect(find.text('Espèces mortelles à connaître'), findsNothing);
+  await tapRevealed(t, find.text('Réinitialiser les filtres'), inside: list);
+  expect(find.text('4 espèces sur 22'), findsNothing);
 }
 
 /// Carnet : nouvelle sortie, récolte avec quantité et poids, totaux.

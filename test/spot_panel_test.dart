@@ -29,8 +29,11 @@ Finder _inMap(Finder f) => find.descendant(of: find.byType(MapScreen), matching:
 
 /// Pastille du panneau. La rangée des types défile : une pastille sortie de
 /// l'écran existe encore, d'où `skipOffstage: false`.
-Finder _chip(String label) =>
-    _inMap(find.widgetWithText(FilterChip, label, skipOffstage: false));
+Finder _chip(String label) => find.descendant(
+      of: find.byType(MapScreen),
+      matching: find.widgetWithText(FilterChip, label, skipOffstage: false),
+      skipOffstage: false,
+    );
 
 /// Appuie sur une pastille du panneau (amenée à l'écran si elle est hors de la
 /// rangée visible).

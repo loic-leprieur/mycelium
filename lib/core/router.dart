@@ -14,6 +14,7 @@ import '../features/map/ui/spot_form_screen.dart';
 import '../features/safety/consent_screen.dart';
 import '../features/safety/safety_screen.dart';
 import '../features/settings/data/data_screen.dart';
+import '../features/settings/display/display_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/species/ui/add_species_screen.dart';
 import '../features/species/ui/species_detail_screen.dart';
@@ -60,6 +61,7 @@ GoRouter buildRouter({String initialLocation = '/splash'}) => GoRouter(
       builder: (_, _) => const SettingsScreen(),
       routes: [
         GoRoute(path: 'data', builder: (_, _) => const DataScreen()),
+        GoRoute(path: 'display', builder: (_, _) => const DisplayScreen()),
         GoRoute(path: 'safety', builder: (_, _) => const SafetyScreen()),
       ],
     ),

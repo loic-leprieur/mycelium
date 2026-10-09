@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/rustic.dart';
 import '../../../core/safety_widgets.dart';
 import '../../../core/theme.dart';
+import '../analysis/multi_photo_screen.dart';
+import '../analysis/quality_dialog.dart';
 import '../identifier.dart';
 import '../identifier_provider.dart';
 import '../identify_flow.dart';
@@ -27,9 +26,7 @@ class IdentifyScreen extends ConsumerStatefulWidget {
 class _IdentifyScreenState extends ConsumerState<IdentifyScreen> {
   bool _busy = false;
 
-  /// L'appareil photo n'est géré que sur téléphone ; sur ordinateur, on choisit
-  /// un fichier.
-  bool get _hasCamera => !kIsWeb && (Platform.isIOS || Platform.isAndroid);
+  bool get _hasCamera => ref.read(hasCameraProvider);
 
   void _snack(String message) {
     if (!mounted) return;
@@ -52,6 +49,14 @@ class _IdentifyScreenState extends ConsumerState<IdentifyScreen> {
             onPhotoChosen: () {
               if (mounted) setState(() => _busy = true);
             },
+            // La barre de progression laisse la place à la fenêtre de choix.
+            onQualityIssue: (report, path) async {
+              if (!mounted) return QualityChoice.useAnyway;
+              setState(() => _busy = false);
+              final choice = await askAboutPhotoQuality(context, report, path);
+              if (mounted) setState(() => _busy = choice == QualityChoice.useAnyway);
+              return choice;
+            },
           );
       if (mounted) context.push('/identify/result', extra: outcome);
     } on IdentifyCancelled {
@@ -63,6 +68,14 @@ class _IdentifyScreenState extends ConsumerState<IdentifyScreen> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// Mode « Je ne sais pas » : plusieurs photos combinées (ID-6).
+  Future<void> _multi(EmbeddingIdentifier engine) async {
+    final outcome = await Navigator.of(context).push<IdentificationOutcome>(
+      MaterialPageRoute(builder: (_) => MultiPhotoScreen(engine: engine)),
+    );
+    if (outcome != null && mounted) context.push('/identify/result', extra: outcome);
   }
 
   @override
@@ -118,6 +131,14 @@ class _IdentifyScreenState extends ConsumerState<IdentifyScreen> {
                     icon: const Icon(Icons.folder_open),
                     label: Text(demoOnly ? 'Choisir une photo (bientôt)' : 'Choisir une photo'),
                   ),
+                if (real is EmbeddingIdentifier) ...[
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: _busy ? null : () => _multi(real),
+                    icon: const Icon(Icons.collections),
+                    label: const Text('Je ne sais pas : plusieurs photos'),
+                  ),
+                ],
                 const SizedBox(height: 10),
                 OutlinedButton.icon(
                   onPressed: () => context.push('/identify/history'),

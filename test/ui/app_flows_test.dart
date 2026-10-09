@@ -1,7 +1,10 @@
+import 'package:flutter/material.dart' show Checkbox;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:mycelium/core/rustic.dart';
+import 'package:mycelium/data/database.dart';
+import 'package:mycelium/features/safety/consent.dart';
 
 import '../support/flows.dart';
 import '../support/harness.dart';
@@ -13,6 +16,7 @@ Future<void> withApp(
   ScreenCase screen,
   Future<void> Function() body, {
   String initialLocation = '/map',
+  Future<void> Function(AppDatabase db)? seed,
 }) async {
   applyScreen(t, screen);
   final app = TestApp(initialLocation: initialLocation);
@@ -20,6 +24,7 @@ Future<void> withApp(
     // La base est peuplée AVANT d'afficher l'application : sinon ses lectures,
     // démarrées dans le temps simulé des tests, bloqueraient l'écriture.
     await app.seedSpots(t);
+    if (seed != null) await t.runAsync(() => seed(app.db));
     await t.pumpWidget(app.widget);
     await body();
   } finally {
@@ -78,6 +83,23 @@ void main() {
       expect(find.text('Mycelium'), findsOneWidget);
       expect(find.text(appSlogan), findsOneWidget);
       await t.pump(const Duration(milliseconds: 2500));
+      await settle(t);
+      expect(find.text('Mes coins (3)'), findsOneWidget);
+      expect(find.text(consentButtonLabel), findsNothing);
+    }, initialLocation: '/splash', seed: recordConsent);
+  });
+
+  testWidgets("écran d'accueil sans consentement : consentement puis carte", (t) async {
+    await withApp(t, screenCases[1], () async {
+      await t.pump(const Duration(milliseconds: 2500));
+      await settle(t);
+      // La carte n'est pas atteinte tant que le texte n'est pas accepté.
+      expect(find.text('Mes coins (3)'), findsNothing);
+      expect(find.text(consentButtonLabel), findsOneWidget);
+
+      await t.tap(find.byType(Checkbox));
+      await t.pump();
+      await t.tap(find.text(consentButtonLabel));
       await settle(t);
       expect(find.text('Mes coins (3)'), findsOneWidget);
     }, initialLocation: '/splash');

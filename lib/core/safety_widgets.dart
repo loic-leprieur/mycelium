@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 /// Texte de l'avertissement obligatoire (RM-4, cahier des charges §9).
 const safetyDisclaimer =
@@ -13,10 +14,14 @@ class InfoBanner extends StatelessWidget {
     required this.color,
     this.icon = Icons.warning_amber_rounded,
     this.title,
+    this.footer,
   });
 
   final String message;
   final String? title;
+
+  /// Élément facultatif sous le message (lien, bouton).
+  final Widget? footer;
   final Color color;
   final IconData icon;
 
@@ -57,6 +62,7 @@ class InfoBanner extends StatelessWidget {
                       .bodyMedium
                       ?.copyWith(color: onColor),
                 ),
+                ?footer,
               ],
             ),
           ),
@@ -74,6 +80,23 @@ class SafetyDisclaimer extends StatelessWidget {
   Widget build(BuildContext context) => InfoBanner(
         message: safetyDisclaimer,
         color: const Color(0xFFFFE082),
+        footer: Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.black87,
+              minimumSize: const Size(48, 48),
+              padding: EdgeInsets.zero,
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.w700,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            onPressed: () => context.push('/settings/safety'),
+            icon: const Icon(Icons.health_and_safety_outlined),
+            label: const Text("En cas d'intoxication"),
+          ),
+        ),
       );
 }
 

@@ -2,28 +2,45 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/rustic.dart';
 import '../../core/theme.dart';
+import '../safety/consent.dart';
 
-/// Écran d'accueil animé : le champignon pousse, puis on passe à la carte.
-class SplashScreen extends StatefulWidget {
+/// Écran d'accueil animé : le champignon pousse, puis on passe à la carte, ou au
+/// consentement (§9.1) tant que le texte en vigueur n'a pas été accepté.
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   Timer? _timer;
+  bool _leaving = false;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer(const Duration(milliseconds: 2300), () {
-      if (mounted) context.go('/map');
-    });
+    _timer = Timer(const Duration(milliseconds: 2300), _continue);
+  }
+
+  /// Passe à la suite (une seule fois, par délai ou par appui). Au moindre doute
+  /// sur le consentement (lecture impossible), on le redemande.
+  Future<void> _continue() async {
+    if (_leaving) return;
+    _leaving = true;
+    _timer?.cancel();
+    var accepted = false;
+    try {
+      accepted = await ref.refresh(consentAcceptedProvider.future);
+    } catch (_) {
+      accepted = false;
+    }
+    if (mounted) context.go(accepted ? '/map' : '/consent');
   }
 
   @override
@@ -37,7 +54,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       body: GestureDetector(
-        onTap: () => context.go('/map'),
+        onTap: _continue,
         child: Container(
           width: double.infinity,
           decoration: const BoxDecoration(

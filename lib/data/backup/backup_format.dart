@@ -2,7 +2,7 @@
 ///
 ///   manifest.json                    format, versions, date et comptes par table
 ///   data.json                        toutes les tables
-///   photos/<dossier>/<fichier>       les photos, sous leur chemin RELATIF
+///   photos/DOSSIER/FICHIER           les photos, sous leur chemin RELATIF
 ///
 /// Ce fichier regroupe les constantes, les erreurs et les règles de chemins
 /// (pures, sans accès disque) ; la lecture et l'écriture sont dans

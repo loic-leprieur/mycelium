@@ -465,22 +465,6 @@ class BackupService {
         if (replace) await _clearTables(keepConsent: true);
 
         // Insertion par identifiant : une ligne déjà présente n'est jamais modifiée.
-        Future<BackupCounts> insertNew<T>(
-          Set<String> existing,
-          List<T> rows,
-          String Function(T) idOf,
-          Future<void> Function(List<T>) insert,
-          BackupCounts Function(int added, int present) counts,
-        ) async {
-          final fresh = [for (final r in rows) if (existing.add(idOf(r))) r];
-          if (fresh.isNotEmpty) await insert(fresh);
-          return counts(fresh.length, rows.length - fresh.length);
-        }
-
-        final added = <BackupCounts>[];
-        final present = <BackupCounts>[];
-        void record(Future<BackupCounts> Function(bool isAdded) _) {}
-
         final spots = await _insertNew(
           existing: {for (final r in await db.select(db.spots).get()) r.id},
           rows: data.spots,

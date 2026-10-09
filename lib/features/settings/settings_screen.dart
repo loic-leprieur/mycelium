@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+
 /// Réglages : point d'entrée des sous-écrans. Chaque sous-écran est tenu par son
 /// propre module (`settings/data`, `safety`).
 class SettingsScreen extends StatelessWidget {
@@ -11,6 +12,14 @@ class SettingsScreen extends StatelessWidget {
         appBar: AppBar(title: const Text('Réglages')),
         body: ListView(
           children: [
+            ListTile(
+              minTileHeight: 72,
+              leading: const Icon(Icons.text_fields),
+              title: const Text('Affichage'),
+              subtitle: const Text('Taille du texte'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/settings/display'),
+            ),
             ListTile(
               minTileHeight: 72,
               leading: const Icon(Icons.save_alt),

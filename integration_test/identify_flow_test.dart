@@ -17,6 +17,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:mycelium/app.dart';
 import 'package:mycelium/core/router.dart';
 import 'package:mycelium/data/database.dart';
+import 'package:mycelium/data/photo_store.dart';
 import 'package:mycelium/data/providers.dart';
 import 'package:mycelium/features/identify/identifier_provider.dart';
 import 'package:mycelium/features/identify/ui/result_screen.dart';
@@ -61,11 +62,21 @@ void main() {
 
     // Sur ordinateur : un seul bouton « Choisir une photo » (pas d'appareil photo).
     await t.tap(find.text('Choisir une photo'));
+    // La photo de test est petite (330 px) : la qualité est signalée (ID-8) et
+    // l'utilisateur choisit de l'utiliser quand même.
+    for (var i = 0; i < 80; i++) {
+      await t.pump(const Duration(milliseconds: 250));
+      if (find.text('Photo à vérifier').evaluate().isNotEmpty) break;
+    }
+    expect(find.text('Photo à vérifier'), findsOneWidget);
+    expect(find.text('Refaire la photo'), findsOneWidget);
+    await t.tap(find.text('Utiliser quand même'));
     for (var i = 0; i < 80; i++) {
       await t.pump(const Duration(milliseconds: 250));
       if (find.text('Résultat').evaluate().isNotEmpty) break;
     }
     expect(find.text('Résultat'), findsOneWidget);
+    expect(find.text('Qualité de la photo'), findsOneWidget);
 
     // Image synthétique : le modèle doit répondre « hors base », sans forcer
     // d'espèce (RM-5), et rien n'est présenté comme une démonstration.
@@ -103,7 +114,7 @@ void main() {
     expect(rows.single.modelVersion, clipModelVersion);
     expect(rows.single.unknownScore, greaterThan(0.5));
     expect(jsonDecode(rows.single.top5Json) as List, isNotEmpty);
-    expect(File(rows.single.photoPath).existsSync(), isTrue,
+    expect(await resolveStoredPhoto(rows.single.photoPath), isNotNull,
         reason: 'la photo est copiée dans le dossier de l\'application');
 
     await t.pumpWidget(const SizedBox());

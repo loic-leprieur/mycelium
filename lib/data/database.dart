@@ -271,6 +271,9 @@ class AppDatabase extends _$AppDatabase {
   Future<void> upsertCustomSpecies(CustomSpeciesCompanion species) =>
       into(customSpecies).insertOnConflictUpdate(species);
 
-  Future<void> deleteCustomSpecies(String id) =>
-      (delete(customSpecies)..where((t) => t.id.equals(id))).go();
+  /// Supprime une espèce perso et ses observations dans les coins.
+  Future<void> deleteCustomSpecies(String id) => transaction(() async {
+        await (delete(spotSpecies)..where((t) => t.speciesId.equals(id))).go();
+        await (delete(customSpecies)..where((t) => t.id.equals(id))).go();
+      });
 }
