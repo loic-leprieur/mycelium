@@ -9,13 +9,19 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/group_filter.dart';
 import '../../../core/theme.dart';
 import '../../../data/database.dart';
 import '../../../data/providers.dart';
-import '../geo.dart';
+import '../../species/domain/species_groups.dart';
+import '../haptics.dart';
 import '../location.dart';
 import '../map_config.dart';
 import '../navigation.dart';
+import '../spot_controls.dart';
+import '../spot_filter.dart';
+import '../spot_providers.dart';
+import '../spot_visits.dart';
 import 'map_widgets.dart';
 
 /// Centre de l'Alsace : point de départ avant d'avoir la position GPS.
@@ -173,25 +179,37 @@ class _MapScreenState extends ConsumerState<MapScreen>
       }
     });
 
-    final spots = ref.watch(spotsProvider).value ?? const <Spot>[];
+    // Un type qui n'existe plus dans les données (dernier coin supprimé, espèce
+    // retirée) quitte la sélection : sinon la liste resterait vide sans raison.
+    ref.listen<Map<MushroomGroup, int>>(spotGroupCountsProvider, (_, counts) {
+      ref.read(mapGroupFilterProvider.notifier).retain(counts.keys.toSet());
+    });
+
+    final totalSpots = ref.watch(spotsProvider).value?.length ?? 0;
+    final entries = ref.watch(spotEntriesProvider);
     final location = ref.watch(locationProvider);
     final nav = ref.watch(navigationProvider);
     final here = location.value?.latLng;
 
-    final entries = [
-      for (final s in spots)
-        (spot: s, distance: here == null ? null : metersBetween(here, LatLng(s.latitude, s.longitude))),
+    // Les filtres valent aussi pour la carte. Le coin guidé reste affiché même
+    // s'ils l'écartent : la droite de guidage doit mener quelque part.
+    final target = nav.target;
+    final markerSpots = [
+      for (final e in entries) e.spot,
+      if (target != null && !entries.any((e) => e.spot.id == target.id)) target,
     ];
-    if (here != null) {
-      entries.sort((a, b) => a.distance!.compareTo(b.distance!));
-    }
 
-    final panelChildren = _panelChildren(entries, nav);
+    final panelChildren = _panelChildren(entries, nav, totalSpots: totalSpots);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mes coins'),
         actions: [
+          IconButton(
+            tooltip: 'Réglages',
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => context.push('/settings'),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 14),
             child: Icon(
@@ -204,7 +222,7 @@ class _MapScreenState extends ConsumerState<MapScreen>
       body: LayoutBuilder(
         builder: (context, constraints) {
           final wide = constraints.maxWidth >= 760;
-          final map = _buildMap(spots, nav, location, wide);
+          final map = _buildMap(markerSpots, nav, location, wide);
           if (wide) {
             return Row(
               children: [
@@ -271,11 +289,21 @@ class _MapScreenState extends ConsumerState<MapScreen>
     );
   }
 
+  /// Remet la liste (et la carte) sans aucun filtre. Le tri choisi est conservé.
+  void _showAll() {
+    ref.read(mapGroupFilterProvider.notifier).clear();
+    ref.read(spotFavoritesOnlyProvider.notifier).reset();
+  }
+
   List<Widget> _panelChildren(
-    List<({Spot spot, double? distance})> entries,
-    NavState nav,
-  ) {
+    List<SpotEntry> entries,
+    NavState nav, {
+    required int totalSpots,
+  }) {
     final theme = Theme.of(context);
+    final groups = ref.watch(mapGroupFilterProvider);
+    final favoritesOnly = ref.watch(spotFavoritesOnlyProvider);
+    final lastVisits = ref.watch(lastVisitBySpotProvider);
     return [
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
@@ -283,7 +311,13 @@ class _MapScreenState extends ConsumerState<MapScreen>
           children: [
             Expanded(
               child: Text(
-                nav.active ? 'Guidage en cours' : 'Mes coins (${entries.length})',
+                nav.active
+                    ? 'Guidage en cours'
+                    : spotListTitle(
+                        count: entries.length,
+                        groups: groups,
+                        favoritesOnly: favoritesOnly,
+                      ),
                 style: theme.textTheme.titleLarge,
               ),
             ),
@@ -301,8 +335,10 @@ class _MapScreenState extends ConsumerState<MapScreen>
           nav: nav,
           onStop: () => ref.read(navigationProvider.notifier).stop(),
           onEdit: () => context.push('/map/spot?id=${nav.target!.id}'),
+          hapticsEnabled: ref.watch(hapticsEnabledProvider),
+          onToggleHaptics: () => ref.read(hapticsEnabledProvider.notifier).toggle(),
         ),
-      if (entries.isEmpty)
+      if (totalSpots == 0)
         NoSpots(onAddHere: _newSpotHere, onDemo: _addDemoSpots)
       else ...[
         if (nav.active)
@@ -310,16 +346,26 @@ class _MapScreenState extends ConsumerState<MapScreen>
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
             child: Text('Autres coins', style: theme.textTheme.titleMedium),
           ),
-        for (var i = 0; i < entries.length; i++)
-          if (nav.target?.id != entries[i].spot.id)
-            SpotTile(
-              spot: entries[i].spot,
-              distance: entries[i].distance,
-              selected: false,
-              onTap: () => _startNavigation(entries[i].spot),
-              onEdit: () => context.push('/map/spot?id=${entries[i].spot.id}'),
-            ).animate().fadeIn(delay: (i.clamp(0, 8) * 50).ms, duration: 300.ms)
-              .slideX(begin: .12, end: 0, delay: (i.clamp(0, 8) * 50).ms),
+        SpotControls(
+          showSortRow: totalSpots > 1 || groups.isNotEmpty || favoritesOnly,
+        ),
+        if (entries.isEmpty)
+          NoMatchingSpots(onShowAll: _showAll)
+        else
+          for (var i = 0; i < entries.length; i++)
+            if (nav.target?.id != entries[i].spot.id)
+              SpotTile(
+                spot: entries[i].spot,
+                distance: entries[i].distance,
+                groups: entries[i].groups,
+                // Pas de « Jamais visité » tant que le carnet n'est pas lu.
+                visitLabel: lastVisits == null ? null : visitLabel(entries[i].lastVisit),
+                selected: false,
+                onTap: () => _startNavigation(entries[i].spot),
+                onEdit: () => context.push('/map/spot?id=${entries[i].spot.id}'),
+              ).animate(key: ValueKey(entries[i].spot.id))
+                .fadeIn(delay: (i.clamp(0, 8) * 50).ms, duration: 300.ms)
+                .slideX(begin: .12, end: 0, delay: (i.clamp(0, 8) * 50).ms),
       ],
     ];
   }
@@ -404,6 +450,9 @@ class _MapScreenState extends ConsumerState<MapScreen>
               markers: [
                 for (final s in spots)
                   Marker(
+                    // La clé évite de rejouer l'apparition des épingles qui restent
+                    // quand un filtre ou le tri change.
+                    key: ValueKey('pin-${s.id}'),
                     point: LatLng(s.latitude, s.longitude),
                     width: 60,
                     height: 60,

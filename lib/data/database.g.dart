@@ -1777,6 +1777,1110 @@ class CustomSpeciesCompanion extends UpdateCompanion<CustomSpeciesRow> {
   }
 }
 
+class $IdentificationsTable extends Identifications
+    with TableInfo<$IdentificationsTable, Identification> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $IdentificationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _photoPathMeta = const VerificationMeta(
+    'photoPath',
+  );
+  @override
+  late final GeneratedColumn<String> photoPath = GeneratedColumn<String>(
+    'photo_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _modelVersionMeta = const VerificationMeta(
+    'modelVersion',
+  );
+  @override
+  late final GeneratedColumn<String> modelVersion = GeneratedColumn<String>(
+    'model_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _top5JsonMeta = const VerificationMeta(
+    'top5Json',
+  );
+  @override
+  late final GeneratedColumn<String> top5Json = GeneratedColumn<String>(
+    'top5_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unknownScoreMeta = const VerificationMeta(
+    'unknownScore',
+  );
+  @override
+  late final GeneratedColumn<double> unknownScore = GeneratedColumn<double>(
+    'unknown_score',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _chosenSpeciesIdMeta = const VerificationMeta(
+    'chosenSpeciesId',
+  );
+  @override
+  late final GeneratedColumn<String> chosenSpeciesId = GeneratedColumn<String>(
+    'chosen_species_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _latitudeMeta = const VerificationMeta(
+    'latitude',
+  );
+  @override
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+    'latitude',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _longitudeMeta = const VerificationMeta(
+    'longitude',
+  );
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+    'longitude',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _spotIdMeta = const VerificationMeta('spotId');
+  @override
+  late final GeneratedColumn<String> spotId = GeneratedColumn<String>(
+    'spot_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    photoPath,
+    modelVersion,
+    top5Json,
+    unknownScore,
+    chosenSpeciesId,
+    createdAt,
+    latitude,
+    longitude,
+    spotId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'identifications';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Identification> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('photo_path')) {
+      context.handle(
+        _photoPathMeta,
+        photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_photoPathMeta);
+    }
+    if (data.containsKey('model_version')) {
+      context.handle(
+        _modelVersionMeta,
+        modelVersion.isAcceptableOrUnknown(
+          data['model_version']!,
+          _modelVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_modelVersionMeta);
+    }
+    if (data.containsKey('top5_json')) {
+      context.handle(
+        _top5JsonMeta,
+        top5Json.isAcceptableOrUnknown(data['top5_json']!, _top5JsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_top5JsonMeta);
+    }
+    if (data.containsKey('unknown_score')) {
+      context.handle(
+        _unknownScoreMeta,
+        unknownScore.isAcceptableOrUnknown(
+          data['unknown_score']!,
+          _unknownScoreMeta,
+        ),
+      );
+    }
+    if (data.containsKey('chosen_species_id')) {
+      context.handle(
+        _chosenSpeciesIdMeta,
+        chosenSpeciesId.isAcceptableOrUnknown(
+          data['chosen_species_id']!,
+          _chosenSpeciesIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('latitude')) {
+      context.handle(
+        _latitudeMeta,
+        latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta),
+      );
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(
+        _longitudeMeta,
+        longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta),
+      );
+    }
+    if (data.containsKey('spot_id')) {
+      context.handle(
+        _spotIdMeta,
+        spotId.isAcceptableOrUnknown(data['spot_id']!, _spotIdMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Identification map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Identification(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      photoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_path'],
+      )!,
+      modelVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}model_version'],
+      )!,
+      top5Json: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}top5_json'],
+      )!,
+      unknownScore: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}unknown_score'],
+      )!,
+      chosenSpeciesId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}chosen_species_id'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      latitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}latitude'],
+      ),
+      longitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}longitude'],
+      ),
+      spotId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}spot_id'],
+      ),
+    );
+  }
+
+  @override
+  $IdentificationsTable createAlias(String alias) {
+    return $IdentificationsTable(attachedDatabase, alias);
+  }
+}
+
+class Identification extends DataClass implements Insertable<Identification> {
+  final String id;
+  final String photoPath;
+  final String modelVersion;
+  final String top5Json;
+  final double unknownScore;
+  final String? chosenSpeciesId;
+  final DateTime createdAt;
+  final double? latitude;
+  final double? longitude;
+  final String? spotId;
+  const Identification({
+    required this.id,
+    required this.photoPath,
+    required this.modelVersion,
+    required this.top5Json,
+    required this.unknownScore,
+    this.chosenSpeciesId,
+    required this.createdAt,
+    this.latitude,
+    this.longitude,
+    this.spotId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['photo_path'] = Variable<String>(photoPath);
+    map['model_version'] = Variable<String>(modelVersion);
+    map['top5_json'] = Variable<String>(top5Json);
+    map['unknown_score'] = Variable<double>(unknownScore);
+    if (!nullToAbsent || chosenSpeciesId != null) {
+      map['chosen_species_id'] = Variable<String>(chosenSpeciesId);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || latitude != null) {
+      map['latitude'] = Variable<double>(latitude);
+    }
+    if (!nullToAbsent || longitude != null) {
+      map['longitude'] = Variable<double>(longitude);
+    }
+    if (!nullToAbsent || spotId != null) {
+      map['spot_id'] = Variable<String>(spotId);
+    }
+    return map;
+  }
+
+  IdentificationsCompanion toCompanion(bool nullToAbsent) {
+    return IdentificationsCompanion(
+      id: Value(id),
+      photoPath: Value(photoPath),
+      modelVersion: Value(modelVersion),
+      top5Json: Value(top5Json),
+      unknownScore: Value(unknownScore),
+      chosenSpeciesId: chosenSpeciesId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(chosenSpeciesId),
+      createdAt: Value(createdAt),
+      latitude: latitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(latitude),
+      longitude: longitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(longitude),
+      spotId: spotId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(spotId),
+    );
+  }
+
+  factory Identification.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Identification(
+      id: serializer.fromJson<String>(json['id']),
+      photoPath: serializer.fromJson<String>(json['photoPath']),
+      modelVersion: serializer.fromJson<String>(json['modelVersion']),
+      top5Json: serializer.fromJson<String>(json['top5Json']),
+      unknownScore: serializer.fromJson<double>(json['unknownScore']),
+      chosenSpeciesId: serializer.fromJson<String?>(json['chosenSpeciesId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      latitude: serializer.fromJson<double?>(json['latitude']),
+      longitude: serializer.fromJson<double?>(json['longitude']),
+      spotId: serializer.fromJson<String?>(json['spotId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'photoPath': serializer.toJson<String>(photoPath),
+      'modelVersion': serializer.toJson<String>(modelVersion),
+      'top5Json': serializer.toJson<String>(top5Json),
+      'unknownScore': serializer.toJson<double>(unknownScore),
+      'chosenSpeciesId': serializer.toJson<String?>(chosenSpeciesId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'latitude': serializer.toJson<double?>(latitude),
+      'longitude': serializer.toJson<double?>(longitude),
+      'spotId': serializer.toJson<String?>(spotId),
+    };
+  }
+
+  Identification copyWith({
+    String? id,
+    String? photoPath,
+    String? modelVersion,
+    String? top5Json,
+    double? unknownScore,
+    Value<String?> chosenSpeciesId = const Value.absent(),
+    DateTime? createdAt,
+    Value<double?> latitude = const Value.absent(),
+    Value<double?> longitude = const Value.absent(),
+    Value<String?> spotId = const Value.absent(),
+  }) => Identification(
+    id: id ?? this.id,
+    photoPath: photoPath ?? this.photoPath,
+    modelVersion: modelVersion ?? this.modelVersion,
+    top5Json: top5Json ?? this.top5Json,
+    unknownScore: unknownScore ?? this.unknownScore,
+    chosenSpeciesId: chosenSpeciesId.present
+        ? chosenSpeciesId.value
+        : this.chosenSpeciesId,
+    createdAt: createdAt ?? this.createdAt,
+    latitude: latitude.present ? latitude.value : this.latitude,
+    longitude: longitude.present ? longitude.value : this.longitude,
+    spotId: spotId.present ? spotId.value : this.spotId,
+  );
+  Identification copyWithCompanion(IdentificationsCompanion data) {
+    return Identification(
+      id: data.id.present ? data.id.value : this.id,
+      photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
+      modelVersion: data.modelVersion.present
+          ? data.modelVersion.value
+          : this.modelVersion,
+      top5Json: data.top5Json.present ? data.top5Json.value : this.top5Json,
+      unknownScore: data.unknownScore.present
+          ? data.unknownScore.value
+          : this.unknownScore,
+      chosenSpeciesId: data.chosenSpeciesId.present
+          ? data.chosenSpeciesId.value
+          : this.chosenSpeciesId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      spotId: data.spotId.present ? data.spotId.value : this.spotId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Identification(')
+          ..write('id: $id, ')
+          ..write('photoPath: $photoPath, ')
+          ..write('modelVersion: $modelVersion, ')
+          ..write('top5Json: $top5Json, ')
+          ..write('unknownScore: $unknownScore, ')
+          ..write('chosenSpeciesId: $chosenSpeciesId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('spotId: $spotId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    photoPath,
+    modelVersion,
+    top5Json,
+    unknownScore,
+    chosenSpeciesId,
+    createdAt,
+    latitude,
+    longitude,
+    spotId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Identification &&
+          other.id == this.id &&
+          other.photoPath == this.photoPath &&
+          other.modelVersion == this.modelVersion &&
+          other.top5Json == this.top5Json &&
+          other.unknownScore == this.unknownScore &&
+          other.chosenSpeciesId == this.chosenSpeciesId &&
+          other.createdAt == this.createdAt &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
+          other.spotId == this.spotId);
+}
+
+class IdentificationsCompanion extends UpdateCompanion<Identification> {
+  final Value<String> id;
+  final Value<String> photoPath;
+  final Value<String> modelVersion;
+  final Value<String> top5Json;
+  final Value<double> unknownScore;
+  final Value<String?> chosenSpeciesId;
+  final Value<DateTime> createdAt;
+  final Value<double?> latitude;
+  final Value<double?> longitude;
+  final Value<String?> spotId;
+  final Value<int> rowid;
+  const IdentificationsCompanion({
+    this.id = const Value.absent(),
+    this.photoPath = const Value.absent(),
+    this.modelVersion = const Value.absent(),
+    this.top5Json = const Value.absent(),
+    this.unknownScore = const Value.absent(),
+    this.chosenSpeciesId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.spotId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  IdentificationsCompanion.insert({
+    required String id,
+    required String photoPath,
+    required String modelVersion,
+    required String top5Json,
+    this.unknownScore = const Value.absent(),
+    this.chosenSpeciesId = const Value.absent(),
+    required DateTime createdAt,
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.spotId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       photoPath = Value(photoPath),
+       modelVersion = Value(modelVersion),
+       top5Json = Value(top5Json),
+       createdAt = Value(createdAt);
+  static Insertable<Identification> custom({
+    Expression<String>? id,
+    Expression<String>? photoPath,
+    Expression<String>? modelVersion,
+    Expression<String>? top5Json,
+    Expression<double>? unknownScore,
+    Expression<String>? chosenSpeciesId,
+    Expression<DateTime>? createdAt,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
+    Expression<String>? spotId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (photoPath != null) 'photo_path': photoPath,
+      if (modelVersion != null) 'model_version': modelVersion,
+      if (top5Json != null) 'top5_json': top5Json,
+      if (unknownScore != null) 'unknown_score': unknownScore,
+      if (chosenSpeciesId != null) 'chosen_species_id': chosenSpeciesId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (spotId != null) 'spot_id': spotId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  IdentificationsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? photoPath,
+    Value<String>? modelVersion,
+    Value<String>? top5Json,
+    Value<double>? unknownScore,
+    Value<String?>? chosenSpeciesId,
+    Value<DateTime>? createdAt,
+    Value<double?>? latitude,
+    Value<double?>? longitude,
+    Value<String?>? spotId,
+    Value<int>? rowid,
+  }) {
+    return IdentificationsCompanion(
+      id: id ?? this.id,
+      photoPath: photoPath ?? this.photoPath,
+      modelVersion: modelVersion ?? this.modelVersion,
+      top5Json: top5Json ?? this.top5Json,
+      unknownScore: unknownScore ?? this.unknownScore,
+      chosenSpeciesId: chosenSpeciesId ?? this.chosenSpeciesId,
+      createdAt: createdAt ?? this.createdAt,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      spotId: spotId ?? this.spotId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (photoPath.present) {
+      map['photo_path'] = Variable<String>(photoPath.value);
+    }
+    if (modelVersion.present) {
+      map['model_version'] = Variable<String>(modelVersion.value);
+    }
+    if (top5Json.present) {
+      map['top5_json'] = Variable<String>(top5Json.value);
+    }
+    if (unknownScore.present) {
+      map['unknown_score'] = Variable<double>(unknownScore.value);
+    }
+    if (chosenSpeciesId.present) {
+      map['chosen_species_id'] = Variable<String>(chosenSpeciesId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
+    }
+    if (spotId.present) {
+      map['spot_id'] = Variable<String>(spotId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IdentificationsCompanion(')
+          ..write('id: $id, ')
+          ..write('photoPath: $photoPath, ')
+          ..write('modelVersion: $modelVersion, ')
+          ..write('top5Json: $top5Json, ')
+          ..write('unknownScore: $unknownScore, ')
+          ..write('chosenSpeciesId: $chosenSpeciesId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('spotId: $spotId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SpotSpeciesTable extends SpotSpecies
+    with TableInfo<$SpotSpeciesTable, SpotSpeciesRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SpotSpeciesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _spotIdMeta = const VerificationMeta('spotId');
+  @override
+  late final GeneratedColumn<String> spotId = GeneratedColumn<String>(
+    'spot_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _speciesIdMeta = const VerificationMeta(
+    'speciesId',
+  );
+  @override
+  late final GeneratedColumn<String> speciesId = GeneratedColumn<String>(
+    'species_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastSeenAtMeta = const VerificationMeta(
+    'lastSeenAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastSeenAt = GeneratedColumn<DateTime>(
+    'last_seen_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [spotId, speciesId, lastSeenAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'spot_species';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SpotSpeciesRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('spot_id')) {
+      context.handle(
+        _spotIdMeta,
+        spotId.isAcceptableOrUnknown(data['spot_id']!, _spotIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_spotIdMeta);
+    }
+    if (data.containsKey('species_id')) {
+      context.handle(
+        _speciesIdMeta,
+        speciesId.isAcceptableOrUnknown(data['species_id']!, _speciesIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_speciesIdMeta);
+    }
+    if (data.containsKey('last_seen_at')) {
+      context.handle(
+        _lastSeenAtMeta,
+        lastSeenAt.isAcceptableOrUnknown(
+          data['last_seen_at']!,
+          _lastSeenAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastSeenAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {spotId, speciesId};
+  @override
+  SpotSpeciesRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SpotSpeciesRow(
+      spotId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}spot_id'],
+      )!,
+      speciesId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}species_id'],
+      )!,
+      lastSeenAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_seen_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SpotSpeciesTable createAlias(String alias) {
+    return $SpotSpeciesTable(attachedDatabase, alias);
+  }
+}
+
+class SpotSpeciesRow extends DataClass implements Insertable<SpotSpeciesRow> {
+  final String spotId;
+  final String speciesId;
+  final DateTime lastSeenAt;
+  const SpotSpeciesRow({
+    required this.spotId,
+    required this.speciesId,
+    required this.lastSeenAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['spot_id'] = Variable<String>(spotId);
+    map['species_id'] = Variable<String>(speciesId);
+    map['last_seen_at'] = Variable<DateTime>(lastSeenAt);
+    return map;
+  }
+
+  SpotSpeciesCompanion toCompanion(bool nullToAbsent) {
+    return SpotSpeciesCompanion(
+      spotId: Value(spotId),
+      speciesId: Value(speciesId),
+      lastSeenAt: Value(lastSeenAt),
+    );
+  }
+
+  factory SpotSpeciesRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SpotSpeciesRow(
+      spotId: serializer.fromJson<String>(json['spotId']),
+      speciesId: serializer.fromJson<String>(json['speciesId']),
+      lastSeenAt: serializer.fromJson<DateTime>(json['lastSeenAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'spotId': serializer.toJson<String>(spotId),
+      'speciesId': serializer.toJson<String>(speciesId),
+      'lastSeenAt': serializer.toJson<DateTime>(lastSeenAt),
+    };
+  }
+
+  SpotSpeciesRow copyWith({
+    String? spotId,
+    String? speciesId,
+    DateTime? lastSeenAt,
+  }) => SpotSpeciesRow(
+    spotId: spotId ?? this.spotId,
+    speciesId: speciesId ?? this.speciesId,
+    lastSeenAt: lastSeenAt ?? this.lastSeenAt,
+  );
+  SpotSpeciesRow copyWithCompanion(SpotSpeciesCompanion data) {
+    return SpotSpeciesRow(
+      spotId: data.spotId.present ? data.spotId.value : this.spotId,
+      speciesId: data.speciesId.present ? data.speciesId.value : this.speciesId,
+      lastSeenAt: data.lastSeenAt.present
+          ? data.lastSeenAt.value
+          : this.lastSeenAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SpotSpeciesRow(')
+          ..write('spotId: $spotId, ')
+          ..write('speciesId: $speciesId, ')
+          ..write('lastSeenAt: $lastSeenAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(spotId, speciesId, lastSeenAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SpotSpeciesRow &&
+          other.spotId == this.spotId &&
+          other.speciesId == this.speciesId &&
+          other.lastSeenAt == this.lastSeenAt);
+}
+
+class SpotSpeciesCompanion extends UpdateCompanion<SpotSpeciesRow> {
+  final Value<String> spotId;
+  final Value<String> speciesId;
+  final Value<DateTime> lastSeenAt;
+  final Value<int> rowid;
+  const SpotSpeciesCompanion({
+    this.spotId = const Value.absent(),
+    this.speciesId = const Value.absent(),
+    this.lastSeenAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SpotSpeciesCompanion.insert({
+    required String spotId,
+    required String speciesId,
+    required DateTime lastSeenAt,
+    this.rowid = const Value.absent(),
+  }) : spotId = Value(spotId),
+       speciesId = Value(speciesId),
+       lastSeenAt = Value(lastSeenAt);
+  static Insertable<SpotSpeciesRow> custom({
+    Expression<String>? spotId,
+    Expression<String>? speciesId,
+    Expression<DateTime>? lastSeenAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (spotId != null) 'spot_id': spotId,
+      if (speciesId != null) 'species_id': speciesId,
+      if (lastSeenAt != null) 'last_seen_at': lastSeenAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SpotSpeciesCompanion copyWith({
+    Value<String>? spotId,
+    Value<String>? speciesId,
+    Value<DateTime>? lastSeenAt,
+    Value<int>? rowid,
+  }) {
+    return SpotSpeciesCompanion(
+      spotId: spotId ?? this.spotId,
+      speciesId: speciesId ?? this.speciesId,
+      lastSeenAt: lastSeenAt ?? this.lastSeenAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (spotId.present) {
+      map['spot_id'] = Variable<String>(spotId.value);
+    }
+    if (speciesId.present) {
+      map['species_id'] = Variable<String>(speciesId.value);
+    }
+    if (lastSeenAt.present) {
+      map['last_seen_at'] = Variable<DateTime>(lastSeenAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SpotSpeciesCompanion(')
+          ..write('spotId: $spotId, ')
+          ..write('speciesId: $speciesId, ')
+          ..write('lastSeenAt: $lastSeenAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AppMetaTable extends AppMeta with TableInfo<$AppMetaTable, AppMetaRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AppMetaTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [key, value];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'app_meta';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AppMetaRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('key')) {
+      context.handle(
+        _keyMeta,
+        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {key};
+  @override
+  AppMetaRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AppMetaRow(
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
+    );
+  }
+
+  @override
+  $AppMetaTable createAlias(String alias) {
+    return $AppMetaTable(attachedDatabase, alias);
+  }
+}
+
+class AppMetaRow extends DataClass implements Insertable<AppMetaRow> {
+  final String key;
+  final String value;
+  const AppMetaRow({required this.key, required this.value});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['key'] = Variable<String>(key);
+    map['value'] = Variable<String>(value);
+    return map;
+  }
+
+  AppMetaCompanion toCompanion(bool nullToAbsent) {
+    return AppMetaCompanion(key: Value(key), value: Value(value));
+  }
+
+  factory AppMetaRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AppMetaRow(
+      key: serializer.fromJson<String>(json['key']),
+      value: serializer.fromJson<String>(json['value']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'key': serializer.toJson<String>(key),
+      'value': serializer.toJson<String>(value),
+    };
+  }
+
+  AppMetaRow copyWith({String? key, String? value}) =>
+      AppMetaRow(key: key ?? this.key, value: value ?? this.value);
+  AppMetaRow copyWithCompanion(AppMetaCompanion data) {
+    return AppMetaRow(
+      key: data.key.present ? data.key.value : this.key,
+      value: data.value.present ? data.value.value : this.value,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppMetaRow(')
+          ..write('key: $key, ')
+          ..write('value: $value')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(key, value);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AppMetaRow &&
+          other.key == this.key &&
+          other.value == this.value);
+}
+
+class AppMetaCompanion extends UpdateCompanion<AppMetaRow> {
+  final Value<String> key;
+  final Value<String> value;
+  final Value<int> rowid;
+  const AppMetaCompanion({
+    this.key = const Value.absent(),
+    this.value = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AppMetaCompanion.insert({
+    required String key,
+    required String value,
+    this.rowid = const Value.absent(),
+  }) : key = Value(key),
+       value = Value(value);
+  static Insertable<AppMetaRow> custom({
+    Expression<String>? key,
+    Expression<String>? value,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (key != null) 'key': key,
+      if (value != null) 'value': value,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AppMetaCompanion copyWith({
+    Value<String>? key,
+    Value<String>? value,
+    Value<int>? rowid,
+  }) {
+    return AppMetaCompanion(
+      key: key ?? this.key,
+      value: value ?? this.value,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppMetaCompanion(')
+          ..write('key: $key, ')
+          ..write('value: $value, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1784,6 +2888,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $OutingsTable outings = $OutingsTable(this);
   late final $HarvestsTable harvests = $HarvestsTable(this);
   late final $CustomSpeciesTable customSpecies = $CustomSpeciesTable(this);
+  late final $IdentificationsTable identifications = $IdentificationsTable(
+    this,
+  );
+  late final $SpotSpeciesTable spotSpecies = $SpotSpeciesTable(this);
+  late final $AppMetaTable appMeta = $AppMetaTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1793,6 +2902,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     outings,
     harvests,
     customSpecies,
+    identifications,
+    spotSpecies,
+    appMeta,
   ];
 }
 
@@ -2739,6 +3851,632 @@ typedef $$CustomSpeciesTableProcessedTableManager =
       CustomSpeciesRow,
       PrefetchHooks Function()
     >;
+typedef $$IdentificationsTableCreateCompanionBuilder =
+    IdentificationsCompanion Function({
+      required String id,
+      required String photoPath,
+      required String modelVersion,
+      required String top5Json,
+      Value<double> unknownScore,
+      Value<String?> chosenSpeciesId,
+      required DateTime createdAt,
+      Value<double?> latitude,
+      Value<double?> longitude,
+      Value<String?> spotId,
+      Value<int> rowid,
+    });
+typedef $$IdentificationsTableUpdateCompanionBuilder =
+    IdentificationsCompanion Function({
+      Value<String> id,
+      Value<String> photoPath,
+      Value<String> modelVersion,
+      Value<String> top5Json,
+      Value<double> unknownScore,
+      Value<String?> chosenSpeciesId,
+      Value<DateTime> createdAt,
+      Value<double?> latitude,
+      Value<double?> longitude,
+      Value<String?> spotId,
+      Value<int> rowid,
+    });
+
+class $$IdentificationsTableFilterComposer
+    extends Composer<_$AppDatabase, $IdentificationsTable> {
+  $$IdentificationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get top5Json => $composableBuilder(
+    column: $table.top5Json,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get unknownScore => $composableBuilder(
+    column: $table.unknownScore,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get chosenSpeciesId => $composableBuilder(
+    column: $table.chosenSpeciesId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get spotId => $composableBuilder(
+    column: $table.spotId,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$IdentificationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $IdentificationsTable> {
+  $$IdentificationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get top5Json => $composableBuilder(
+    column: $table.top5Json,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get unknownScore => $composableBuilder(
+    column: $table.unknownScore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get chosenSpeciesId => $composableBuilder(
+    column: $table.chosenSpeciesId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get spotId => $composableBuilder(
+    column: $table.spotId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$IdentificationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $IdentificationsTable> {
+  $$IdentificationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get photoPath =>
+      $composableBuilder(column: $table.photoPath, builder: (column) => column);
+
+  GeneratedColumn<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get top5Json =>
+      $composableBuilder(column: $table.top5Json, builder: (column) => column);
+
+  GeneratedColumn<double> get unknownScore => $composableBuilder(
+    column: $table.unknownScore,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get chosenSpeciesId => $composableBuilder(
+    column: $table.chosenSpeciesId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
+
+  GeneratedColumn<String> get spotId =>
+      $composableBuilder(column: $table.spotId, builder: (column) => column);
+}
+
+class $$IdentificationsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $IdentificationsTable,
+          Identification,
+          $$IdentificationsTableFilterComposer,
+          $$IdentificationsTableOrderingComposer,
+          $$IdentificationsTableAnnotationComposer,
+          $$IdentificationsTableCreateCompanionBuilder,
+          $$IdentificationsTableUpdateCompanionBuilder,
+          (
+            Identification,
+            BaseReferences<
+              _$AppDatabase,
+              $IdentificationsTable,
+              Identification
+            >,
+          ),
+          Identification,
+          PrefetchHooks Function()
+        > {
+  $$IdentificationsTableTableManager(
+    _$AppDatabase db,
+    $IdentificationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$IdentificationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$IdentificationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$IdentificationsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> photoPath = const Value.absent(),
+                Value<String> modelVersion = const Value.absent(),
+                Value<String> top5Json = const Value.absent(),
+                Value<double> unknownScore = const Value.absent(),
+                Value<String?> chosenSpeciesId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
+                Value<String?> spotId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => IdentificationsCompanion(
+                id: id,
+                photoPath: photoPath,
+                modelVersion: modelVersion,
+                top5Json: top5Json,
+                unknownScore: unknownScore,
+                chosenSpeciesId: chosenSpeciesId,
+                createdAt: createdAt,
+                latitude: latitude,
+                longitude: longitude,
+                spotId: spotId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String photoPath,
+                required String modelVersion,
+                required String top5Json,
+                Value<double> unknownScore = const Value.absent(),
+                Value<String?> chosenSpeciesId = const Value.absent(),
+                required DateTime createdAt,
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
+                Value<String?> spotId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => IdentificationsCompanion.insert(
+                id: id,
+                photoPath: photoPath,
+                modelVersion: modelVersion,
+                top5Json: top5Json,
+                unknownScore: unknownScore,
+                chosenSpeciesId: chosenSpeciesId,
+                createdAt: createdAt,
+                latitude: latitude,
+                longitude: longitude,
+                spotId: spotId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$IdentificationsTable, Identification>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $IdentificationsTable,
+                    Identification
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$IdentificationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $IdentificationsTable,
+      Identification,
+      $$IdentificationsTableFilterComposer,
+      $$IdentificationsTableOrderingComposer,
+      $$IdentificationsTableAnnotationComposer,
+      $$IdentificationsTableCreateCompanionBuilder,
+      $$IdentificationsTableUpdateCompanionBuilder,
+      (
+        Identification,
+        BaseReferences<_$AppDatabase, $IdentificationsTable, Identification>,
+      ),
+      Identification,
+      PrefetchHooks Function()
+    >;
+typedef $$SpotSpeciesTableCreateCompanionBuilder =
+    SpotSpeciesCompanion Function({
+      required String spotId,
+      required String speciesId,
+      required DateTime lastSeenAt,
+      Value<int> rowid,
+    });
+typedef $$SpotSpeciesTableUpdateCompanionBuilder =
+    SpotSpeciesCompanion Function({
+      Value<String> spotId,
+      Value<String> speciesId,
+      Value<DateTime> lastSeenAt,
+      Value<int> rowid,
+    });
+
+class $$SpotSpeciesTableFilterComposer
+    extends Composer<_$AppDatabase, $SpotSpeciesTable> {
+  $$SpotSpeciesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get spotId => $composableBuilder(
+    column: $table.spotId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get speciesId => $composableBuilder(
+    column: $table.speciesId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastSeenAt => $composableBuilder(
+    column: $table.lastSeenAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SpotSpeciesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SpotSpeciesTable> {
+  $$SpotSpeciesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get spotId => $composableBuilder(
+    column: $table.spotId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get speciesId => $composableBuilder(
+    column: $table.speciesId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastSeenAt => $composableBuilder(
+    column: $table.lastSeenAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SpotSpeciesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SpotSpeciesTable> {
+  $$SpotSpeciesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get spotId =>
+      $composableBuilder(column: $table.spotId, builder: (column) => column);
+
+  GeneratedColumn<String> get speciesId =>
+      $composableBuilder(column: $table.speciesId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastSeenAt => $composableBuilder(
+    column: $table.lastSeenAt,
+    builder: (column) => column,
+  );
+}
+
+class $$SpotSpeciesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SpotSpeciesTable,
+          SpotSpeciesRow,
+          $$SpotSpeciesTableFilterComposer,
+          $$SpotSpeciesTableOrderingComposer,
+          $$SpotSpeciesTableAnnotationComposer,
+          $$SpotSpeciesTableCreateCompanionBuilder,
+          $$SpotSpeciesTableUpdateCompanionBuilder,
+          (
+            SpotSpeciesRow,
+            BaseReferences<_$AppDatabase, $SpotSpeciesTable, SpotSpeciesRow>,
+          ),
+          SpotSpeciesRow,
+          PrefetchHooks Function()
+        > {
+  $$SpotSpeciesTableTableManager(_$AppDatabase db, $SpotSpeciesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SpotSpeciesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SpotSpeciesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SpotSpeciesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> spotId = const Value.absent(),
+                Value<String> speciesId = const Value.absent(),
+                Value<DateTime> lastSeenAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SpotSpeciesCompanion(
+                spotId: spotId,
+                speciesId: speciesId,
+                lastSeenAt: lastSeenAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String spotId,
+                required String speciesId,
+                required DateTime lastSeenAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SpotSpeciesCompanion.insert(
+                spotId: spotId,
+                speciesId: speciesId,
+                lastSeenAt: lastSeenAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SpotSpeciesTable, SpotSpeciesRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SpotSpeciesTable,
+                    SpotSpeciesRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SpotSpeciesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SpotSpeciesTable,
+      SpotSpeciesRow,
+      $$SpotSpeciesTableFilterComposer,
+      $$SpotSpeciesTableOrderingComposer,
+      $$SpotSpeciesTableAnnotationComposer,
+      $$SpotSpeciesTableCreateCompanionBuilder,
+      $$SpotSpeciesTableUpdateCompanionBuilder,
+      (
+        SpotSpeciesRow,
+        BaseReferences<_$AppDatabase, $SpotSpeciesTable, SpotSpeciesRow>,
+      ),
+      SpotSpeciesRow,
+      PrefetchHooks Function()
+    >;
+typedef $$AppMetaTableCreateCompanionBuilder = AppMetaCompanion Function({
+  required String key,
+  required String value,
+  Value<int> rowid,
+});
+typedef $$AppMetaTableUpdateCompanionBuilder = AppMetaCompanion Function({
+  Value<String> key,
+  Value<String> value,
+  Value<int> rowid,
+});
+
+class $$AppMetaTableFilterComposer
+    extends Composer<_$AppDatabase, $AppMetaTable> {
+  $$AppMetaTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AppMetaTableOrderingComposer
+    extends Composer<_$AppDatabase, $AppMetaTable> {
+  $$AppMetaTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AppMetaTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AppMetaTable> {
+  $$AppMetaTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+}
+
+class $$AppMetaTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AppMetaTable,
+          AppMetaRow,
+          $$AppMetaTableFilterComposer,
+          $$AppMetaTableOrderingComposer,
+          $$AppMetaTableAnnotationComposer,
+          $$AppMetaTableCreateCompanionBuilder,
+          $$AppMetaTableUpdateCompanionBuilder,
+          (
+            AppMetaRow,
+            BaseReferences<_$AppDatabase, $AppMetaTable, AppMetaRow>,
+          ),
+          AppMetaRow,
+          PrefetchHooks Function()
+        > {
+  $$AppMetaTableTableManager(_$AppDatabase db, $AppMetaTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AppMetaTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AppMetaTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AppMetaTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> key = const Value.absent(),
+            Value<String> value = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => AppMetaCompanion(key: key, value: value, rowid: rowid),
+          createCompanionCallback: ({
+            required String key,
+            required String value,
+            Value<int> rowid = const Value.absent(),
+          }) => AppMetaCompanion.insert(key: key, value: value, rowid: rowid),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AppMetaTable, AppMetaRow>(table),
+                  BaseReferences<_$AppDatabase, $AppMetaTable, AppMetaRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AppMetaTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AppMetaTable,
+      AppMetaRow,
+      $$AppMetaTableFilterComposer,
+      $$AppMetaTableOrderingComposer,
+      $$AppMetaTableAnnotationComposer,
+      $$AppMetaTableCreateCompanionBuilder,
+      $$AppMetaTableUpdateCompanionBuilder,
+      (AppMetaRow, BaseReferences<_$AppDatabase, $AppMetaTable, AppMetaRow>),
+      AppMetaRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2751,4 +4489,10 @@ class $AppDatabaseManager {
       $$HarvestsTableTableManager(_db, _db.harvests);
   $$CustomSpeciesTableTableManager get customSpecies =>
       $$CustomSpeciesTableTableManager(_db, _db.customSpecies);
+  $$IdentificationsTableTableManager get identifications =>
+      $$IdentificationsTableTableManager(_db, _db.identifications);
+  $$SpotSpeciesTableTableManager get spotSpecies =>
+      $$SpotSpeciesTableTableManager(_db, _db.spotSpecies);
+  $$AppMetaTableTableManager get appMeta =>
+      $$AppMetaTableTableManager(_db, _db.appMeta);
 }

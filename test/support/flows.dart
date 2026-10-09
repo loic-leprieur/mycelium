@@ -62,9 +62,12 @@ Future<void> runMapFlow(WidgetTester t) async {
   await reveal(t, find.text('Autres coins'), inside: find.byType(MapScreen));
   expect(find.text('Autres coins'), findsOneWidget);
 
-  // Arrêt du guidage.
-  await tapRevealed(t, find.text('Arrêter le guidage'),
-      inside: find.byType(MapScreen));
+  // Arrêt du guidage. Le bouton est dans le résumé, au-dessus de « Autres coins » :
+  // le défilement vers ce titre a pu le faire sortir de l'écran (il reste construit).
+  await t.ensureVisible(find.text('Arrêter le guidage', skipOffstage: false));
+  await t.pump(const Duration(milliseconds: 300));
+  await t.tap(find.text('Arrêter le guidage'));
+  await settle(t);
   expect(find.text('Guidage en cours'), findsNothing);
   // Remonte en haut du panneau (liste paresseuse, restée défilée).
   await t.drag(

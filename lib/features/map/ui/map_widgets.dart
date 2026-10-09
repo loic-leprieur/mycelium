@@ -8,9 +8,11 @@ import 'package:geolocator/geolocator.dart';
 import '../../../core/rustic.dart';
 import '../../../core/theme.dart';
 import '../../../data/database.dart';
+import '../../species/domain/species_groups.dart';
 import '../geo.dart';
 import '../location.dart';
 import '../navigation.dart';
+import '../spot_filter.dart';
 
 /// Point bleu de la position GPS avec un anneau qui pulse.
 class UserDot extends StatelessWidget {
@@ -270,11 +272,17 @@ class NavigationSummary extends StatelessWidget {
     required this.nav,
     required this.onStop,
     required this.onEdit,
+    required this.hapticsEnabled,
+    required this.onToggleHaptics,
   });
 
   final NavState nav;
   final VoidCallback onStop;
   final VoidCallback onEdit;
+
+  /// Vibrations de guidage (MAP-9) actives ou non.
+  final bool hapticsEnabled;
+  final VoidCallback onToggleHaptics;
 
   @override
   Widget build(BuildContext context) {
@@ -330,7 +338,17 @@ class NavigationSummary extends StatelessWidget {
                 style: TextStyle(fontSize: 13),
               ),
             ),
-            const SizedBox(height: 10),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              secondary: const Icon(Icons.vibration, color: Palette.forestDark),
+              title: const Text('Vibrations de guidage'),
+              subtitle: const Text(
+                'Dès 50 m, de plus en plus rapprochées.',
+                style: TextStyle(fontSize: 13),
+              ),
+              value: hapticsEnabled,
+              onChanged: (_) => onToggleHaptics(),
+            ),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
@@ -373,7 +391,8 @@ class _Figure extends StatelessWidget {
   }
 }
 
-/// Ligne de la liste des coins.
+/// Ligne de la liste des coins : nom, forêt et distance, types de champignons
+/// observés (SPOT-4) et dernière visite (SPOT-5).
 class SpotTile extends StatelessWidget {
   const SpotTile({
     super.key,
@@ -382,6 +401,8 @@ class SpotTile extends StatelessWidget {
     required this.selected,
     required this.onTap,
     required this.onEdit,
+    this.groups = const {},
+    this.visitLabel,
   });
 
   final Spot spot;
@@ -390,12 +411,21 @@ class SpotTile extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onEdit;
 
+  /// Types de champignons observés dans ce coin.
+  final Set<MushroomGroup> groups;
+
+  /// « Dernière visite : 5 oct. 2026 » ou « Jamais visité » ; null tant que le
+  /// carnet n'est pas chargé.
+  final String? visitLabel;
+
   @override
   Widget build(BuildContext context) {
-    final subtitle = [
+    final theme = Theme.of(context);
+    final place = [
       if (spot.forestType != null) spot.forestType!,
       if (distance != null) 'à ${formatDistance(distance!)}',
     ].join(' · ');
+    final visit = visitLabel;
 
     // Le fond est porté par un Material (et non par une DecoratedBox) pour que
     // l'effet d'ondulation du ListTile reste visible.
@@ -422,7 +452,23 @@ class SpotTile extends StatelessWidget {
           ),
         ),
         title: Text(spot.name, style: const TextStyle(fontWeight: FontWeight.w700)),
-        subtitle: subtitle.isEmpty ? null : Text(subtitle),
+        subtitle: (place.isEmpty && groups.isEmpty && visit == null)
+            ? null
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (place.isNotEmpty) Text(place),
+                  if (groups.isNotEmpty)
+                    Text(
+                      groupsLine(groups),
+                      style: const TextStyle(
+                        color: Palette.forest,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  if (visit != null) Text(visit, style: theme.textTheme.bodySmall),
+                ],
+              ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

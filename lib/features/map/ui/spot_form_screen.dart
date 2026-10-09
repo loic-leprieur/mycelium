@@ -6,10 +6,13 @@ import 'package:uuid/uuid.dart';
 
 import '../../../data/database.dart';
 import '../../../data/providers.dart';
+import '../spot_form_sections.dart';
 
 const _forestTypes = ['Feuillus', 'Conifères', 'Mixte', 'Autre'];
 
-/// Création / modification / suppression d'un coin (SPOT-1 à SPOT-3).
+/// Création / modification / suppression d'un coin (SPOT-1 à SPOT-3), avec ses
+/// espèces observées (SPOT-4) et, une fois créé, les sorties qui y ont eu lieu
+/// (SPOT-5).
 class SpotFormScreen extends ConsumerStatefulWidget {
   const SpotFormScreen({super.key, this.spotId, this.latitude, this.longitude});
 
@@ -32,6 +35,14 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
   bool _loaded = false;
   DateTime? _createdAt;
 
+  /// Espèces observées (espèce -> dernière observation) : copie de travail,
+  /// écrite en base à l'enregistrement, comme le reste du formulaire. Un coin
+  /// pas encore créé n'a pas de ligne en base où les noter avant.
+  final Map<String, DateTime> _seen = {};
+
+  /// Ce que la base contenait à l'ouverture, pour n'écrire que les différences.
+  Map<String, DateTime> _savedSeen = const {};
+
   bool get _isEdit => widget.spotId != null;
 
   @override
@@ -47,7 +58,9 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
   }
 
   Future<void> _load() async {
-    final spot = await ref.read(databaseProvider).spotById(widget.spotId!);
+    final db = ref.read(databaseProvider);
+    final spot = await db.spotById(widget.spotId!);
+    final observed = await db.watchSpotSpecies().first;
     if (!mounted) return;
     if (spot == null) {
       context.pop();
@@ -61,6 +74,11 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
       _forestType = spot.forestType;
       _favorite = spot.isFavorite;
       _createdAt = spot.createdAt;
+      _savedSeen = {
+        for (final row in observed)
+          if (row.spotId == spot.id) row.speciesId: row.lastSeenAt,
+      };
+      _seen.addAll(_savedSeen);
       _loaded = true;
     });
   }
@@ -84,19 +102,33 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
     if (!_formKey.currentState!.validate()) return;
     final now = DateTime.now();
     final notes = _notes.text.trim();
-    await ref.read(databaseProvider).upsertSpot(
-          SpotsCompanion.insert(
-            id: widget.spotId ?? const Uuid().v4(),
-            name: _name.text.trim(),
-            latitude: double.parse(_lat.text.replaceAll(',', '.')),
-            longitude: double.parse(_lon.text.replaceAll(',', '.')),
-            forestType: Value(_forestType),
-            notes: Value(notes.isEmpty ? null : notes),
-            isFavorite: Value(_favorite),
-            createdAt: _createdAt ?? now,
-            updatedAt: now,
-          ),
-        );
+    final spotId = widget.spotId ?? const Uuid().v4();
+    final db = ref.read(databaseProvider);
+    await db.transaction(() async {
+      await db.upsertSpot(
+        SpotsCompanion.insert(
+          id: spotId,
+          name: _name.text.trim(),
+          latitude: double.parse(_lat.text.replaceAll(',', '.')),
+          longitude: double.parse(_lon.text.replaceAll(',', '.')),
+          forestType: Value(_forestType),
+          notes: Value(notes.isEmpty ? null : notes),
+          isFavorite: Value(_favorite),
+          createdAt: _createdAt ?? now,
+          updatedAt: now,
+        ),
+      );
+      // Espèces retirées, puis espèces ajoutées (ou revues plus récemment).
+      for (final speciesId in _savedSeen.keys) {
+        if (!_seen.containsKey(speciesId)) await db.unmarkSpecies(spotId, speciesId);
+      }
+      for (final MapEntry(key: speciesId, value: seenAt) in _seen.entries) {
+        final before = _savedSeen[speciesId];
+        if (before == null || seenAt.isAfter(before)) {
+          await db.markSpeciesSeen(spotId, speciesId, seenAt);
+        }
+      }
+    });
     if (mounted) context.pop();
   }
 
@@ -210,7 +242,18 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
                     value: _favorite,
                     onChanged: (v) => setState(() => _favorite = v),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
+                  SpotSpeciesSection(
+                    seen: _seen,
+                    onAdd: (speciesId) =>
+                        setState(() => _seen[speciesId] = DateTime.now()),
+                    onRemove: (speciesId) => setState(() => _seen.remove(speciesId)),
+                  ),
+                  if (_isEdit) ...[
+                    const SizedBox(height: 24),
+                    SpotVisitsSection(spotId: widget.spotId!),
+                  ],
+                  const SizedBox(height: 24),
                   FilledButton(onPressed: _save, child: const Text('Enregistrer')),
                 ],
               ),

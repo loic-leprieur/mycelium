@@ -84,6 +84,7 @@ Légende : 🟢 V1 · 🟡 V2 · ⚪ V3 / plus tard
 | MAP-4 | Recherche d'un lieu (en ligne ; hors ligne limité à ses propres coins) | 🟢 |
 | MAP-5 | **Guidage à vol d'oiseau vers un coin** : un clic sur un coin (liste ou carte) trace une droite jusqu'au coin et indique le cap, la distance en ligne droite et une durée estimée, recalculés à chaque position GPS ; la flèche suit la direction de marche. **Aucun itinéraire** (en forêt il n'y a ni rue ni chemin cartographié) et **aucun réseau requis**. Détection d'arrivée à 20 m | 🟢 |
 | MAP-8 | Liste des coins à côté de la carte (panneau déplaçable sur téléphone, colonne latérale sur grand écran), triée par distance | 🟢 |
+| MAP-9 | **Vibrations de guidage** : pendant le guidage, le téléphone vibre lentement à partir de 50 m du coin, de plus en plus rapproché et de plus en plus fort à mesure qu'on approche (3 s d'intervalle à 50 m, 0,3 s à 5 m). Dans les derniers mètres (≈ 5 m), un signal d'arrivée distinct (3 impulsions fortes) puis silence ; réarmé si on s'éloigne de plus de 15 m. Désactivable depuis le panneau de guidage. Application au premier plan uniquement (pas de guidage en arrière-plan en V1) | 🟢 |
 | MAP-6 | Fond de carte topographique/forestier (chemins, courbes de niveau) | 🟡 |
 | MAP-7 | Enregistrement d'une trace GPS pendant une sortie | 🟡 |
 
@@ -407,6 +408,8 @@ Règle clé : **le modèle ne doit jamais sembler sûr de lui sur une espèce qu
 3. Intégration en V1.5/V2 si les indicateurs sont atteints.
 
 > **Décision :** la V1 est livrée **sans compte et sans IA réelle**. L'identification reste la fonction centrale du produit, mais le développement est découpé pour que l'incertitude du modèle ne bloque pas la livraison.
+>
+> **État au 9 octobre 2026 : modèle embarqué intégré (en avance sur V1.5).** BioCLIP (ViT-B/16, MIT) en classification « zero-shot » tourne sur le téléphone via ONNX Runtime, hors connexion (ID-1 à ID-5, RM-3 à RM-6) ; voir `tools/bioclip/README.md`. Vérifié : conversion fidèle à PyTorch (cosinus 0,9996), résultats de l'application identiques à la chaîne Python (cosinus 0,9999999), ≈ 0,2 s par photo sur un Mac. **Non vérifié : la précision sur de vraies photos de champignons** (jeu de test §11.3 à constituer avec le père) ; seuils S1/S2 non calibrés ; poids 115 Mo (cible < 50 Mo non atteinte) ; licences des données d'entraînement de BioCLIP à vérifier avant publication. Les classes « hors base » empêchent le modèle de forcer une réponse sur une espèce inconnue. La démonstration reste disponible, toujours marquée comme telle.
 >
 > **Démo d'identification avec données en dur (décidée) :** dès la V1, les écrans Identifier et Résultat sont construits avec un **faux moteur** (`FakeIdentifier`) qui renvoie des résultats prédéfinis (top 5 + scores). Il sert à valider l'interface, les avertissements et les règles de sécurité (RM-4/5/6) avec le père. Le moteur est caché derrière une interface (`Identifier`) pour brancher le vrai modèle sans toucher à l'UI. **Cette démo doit être clairement marquée « démonstration »** dans toute version distribuée : un résultat factice ne doit jamais être pris pour une vraie identification.
 

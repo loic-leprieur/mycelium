@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/router.dart';
 import 'core/theme.dart';
+import 'features/map/haptics.dart';
 
 class MyceliumApp extends StatefulWidget {
   /// [router] permet aux tests de démarrer sur un écran précis.
@@ -30,7 +32,7 @@ class _MyceliumAppState extends State<MyceliumApp> {
         final systemScale = media.textScaler.scale(14) / 14;
         return MediaQuery(
           data: media.copyWith(textScaler: TextScaler.linear(systemScale * 1.1)),
-          child: child!,
+          child: _HapticsHost(child: child!),
         );
       },
       locale: const Locale('fr'),
@@ -41,5 +43,19 @@ class _MyceliumAppState extends State<MyceliumApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
     );
+  }
+}
+
+/// Maintient en vie les vibrations de guidage tant que l'application tourne,
+/// quel que soit l'onglet affiché.
+class _HapticsHost extends ConsumerWidget {
+  const _HapticsHost({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(guidanceHapticsProvider);
+    return child;
   }
 }

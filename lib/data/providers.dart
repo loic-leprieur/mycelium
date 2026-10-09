@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/species/data/species_seed.dart';
 import '../features/species/domain/species.dart';
+import '../features/species/domain/species_groups.dart';
 import 'database.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -80,3 +81,28 @@ final outingTotalsProvider = StreamProvider<Map<String, OutingTotals>>(
     return totals;
   }),
 );
+
+/// Historique des identifications par photo, de la plus récente à la plus ancienne.
+final identificationsProvider = StreamProvider<List<Identification>>(
+  (ref) => ref.watch(databaseProvider).watchIdentifications(),
+);
+
+/// Toutes les observations « espèce vue dans un coin » (SPOT-4).
+final spotSpeciesProvider = StreamProvider<List<SpotSpeciesRow>>(
+  (ref) => ref.watch(databaseProvider).watchSpotSpecies(),
+);
+
+/// Espèces observées par coin : identifiant du coin -> identifiants d'espèces.
+final speciesBySpotProvider = Provider<Map<String, Set<String>>>((ref) {
+  final map = <String, Set<String>>{};
+  for (final row in ref.watch(spotSpeciesProvider).value ?? const <SpotSpeciesRow>[]) {
+    (map[row.spotId] ??= {}).add(row.speciesId);
+  }
+  return map;
+});
+
+/// Types de champignons observés par coin : base du filtre « coins à cèpes ».
+final groupsBySpotProvider = Provider<Map<String, Set<MushroomGroup>>>((ref) => {
+      for (final e in ref.watch(speciesBySpotProvider).entries)
+        e.key: groupsOfSpecies(e.value),
+    });

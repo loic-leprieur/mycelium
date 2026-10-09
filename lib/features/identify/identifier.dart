@@ -11,13 +11,42 @@ class Candidate {
 
 /// Seuils de la règle RM-5, à calibrer sur des photos réelles (cahier des charges §11.3).
 class SafetyThresholds {
-  const SafetyThresholds({this.minTopScore = 0.60, this.minMargin = 0.15});
+  const SafetyThresholds({
+    this.minTopScore = 0.60,
+    this.minMargin = 0.15,
+    this.minCandidateScore = 0,
+  });
 
   /// Score minimal du meilleur candidat.
   final double minTopScore;
 
   /// Écart minimal entre le 1er et le 2e candidat.
   final double minMargin;
+
+  /// Score sous lequel un candidat n'est ni affiché ni compté pour RM-6 : un
+  /// modèle réel attribue toujours un peu de probabilité à chaque espèce, et une
+  /// alerte « mortel » à 0,1 % noierait les vraies alertes.
+  final double minCandidateScore;
+}
+
+/// Résultat brut d'un moteur d'identification, avant les règles de sécurité.
+class RawIdentification {
+  const RawIdentification({
+    required this.candidates,
+    required this.modelVersion,
+    this.unknownScore = 0,
+  });
+
+  /// Une probabilité par espèce de la base (0–1), dans n'importe quel ordre.
+  final List<Candidate> candidates;
+
+  /// Version du modèle et des classes (traçabilité, RM-3).
+  final String modelVersion;
+
+  /// Probabilité (0–1) que la photo montre une espèce absente de la base ou
+  /// autre chose qu'un champignon. Le modèle ne doit jamais sembler sûr de lui
+  /// sur ce qu'il ne connaît pas (cahier des charges §11.3).
+  final double unknownScore;
 }
 
 /// Résultat après application des règles de sécurité.
@@ -28,6 +57,11 @@ class IdentificationOutcome {
     required this.dangerousSpeciesIds,
     required this.isDemo,
     this.scenarioLabel,
+    this.unknownScore = 0,
+    this.modelVersion,
+    this.imagePath,
+    this.latitude,
+    this.longitude,
   });
 
   /// Top 5, triés par score décroissant.
@@ -42,6 +76,23 @@ class IdentificationOutcome {
   /// Résultat factice (moteur de démonstration).
   final bool isDemo;
   final String? scenarioLabel;
+
+  /// Probabilité d'une espèce absente de la base (0–1).
+  final double unknownScore;
+
+  /// Version du modèle qui a produit ce résultat (null en démonstration).
+  final String? modelVersion;
+
+  /// Photo analysée (null en démonstration).
+  final String? imagePath;
+
+  /// Où la photo a été prise : position GPS au moment d'une prise de vue avec
+  /// l'appareil photo. Null pour une photo de la galerie (prise ailleurs ou
+  /// avant) : on n'invente pas un emplacement.
+  final double? latitude;
+  final double? longitude;
+
+  bool get hasLocation => latitude != null && longitude != null;
 }
 
 /// Applique RM-5 et RM-6 à une liste de candidats.
@@ -53,16 +104,27 @@ IdentificationOutcome applySafetyRules(
   SafetyThresholds thresholds = const SafetyThresholds(),
   bool isDemo = false,
   String? scenarioLabel,
+  double unknownScore = 0,
+  String? modelVersion,
+  String? imagePath,
+  double? latitude,
+  double? longitude,
 }) {
   final sorted = [...raw]..sort((a, b) => b.score.compareTo(a.score));
-  final top5 = sorted.take(5).toList();
+  final top5 = [
+    for (final c in sorted.take(5))
+      if (c.score >= thresholds.minCandidateScore) c,
+  ];
 
   var insufficient = top5.isEmpty;
   if (top5.isNotEmpty) {
     final topScore = top5.first.score;
     final margin = top5.length > 1 ? topScore - top5[1].score : topScore;
-    insufficient =
-        topScore < thresholds.minTopScore || margin < thresholds.minMargin;
+    insufficient = topScore < thresholds.minTopScore ||
+        margin < thresholds.minMargin ||
+        // Une espèce hors base (ou autre chose) est aussi probable que le meilleur
+        // candidat : on ne force pas de réponse.
+        unknownScore >= topScore;
   }
 
   final dangerous = [
@@ -76,6 +138,11 @@ IdentificationOutcome applySafetyRules(
     dangerousSpeciesIds: dangerous,
     isDemo: isDemo,
     scenarioLabel: scenarioLabel,
+    unknownScore: unknownScore,
+    modelVersion: modelVersion,
+    imagePath: imagePath,
+    latitude: latitude,
+    longitude: longitude,
   );
 }
 
@@ -86,10 +153,14 @@ class IdentificationInput {
   final String? imagePath;
 }
 
-/// Contrat d'un moteur d'identification. Le vrai modèle embarqué (V1.5)
-/// l'implémentera sans modifier l'interface utilisateur.
+/// Contrat d'un moteur d'identification : le moteur de démonstration et le
+/// modèle embarqué (BioCLIP) l'implémentent sans modifier l'interface.
 abstract class Identifier {
-  Future<List<Candidate>> identify(IdentificationInput input);
+  /// Vrai si les résultats sont factices : ils sont alors toujours signalés
+  /// « démonstration » à l'écran et jamais enregistrés.
+  bool get isDemo;
+
+  Future<RawIdentification> identify(IdentificationInput input);
 }
 
 /// Scénario prédéfini du moteur de démonstration.
@@ -107,6 +178,9 @@ class FakeIdentifier implements Identifier {
   FakeIdentifier({this.scenarioIndex = 0});
 
   int scenarioIndex;
+
+  @override
+  bool get isDemo => true;
 
   static const scenarios = <DemoScenario>[
     DemoScenario(
@@ -156,10 +230,13 @@ class FakeIdentifier implements Identifier {
   ];
 
   @override
-  Future<List<Candidate>> identify(IdentificationInput input) async {
+  Future<RawIdentification> identify(IdentificationInput input) async {
     // Petit délai pour simuler le temps d'analyse.
     await Future<void>.delayed(const Duration(milliseconds: 600));
-    return scenarios[scenarioIndex % scenarios.length].candidates;
+    return RawIdentification(
+      candidates: scenarios[scenarioIndex % scenarios.length].candidates,
+      modelVersion: 'demo',
+    );
   }
 }
 

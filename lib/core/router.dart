@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/identify/history/detail_screen.dart';
+import '../features/identify/history/history_screen.dart';
 import '../features/identify/identifier.dart';
 import '../features/identify/ui/identify_screen.dart';
 import '../features/identify/ui/result_screen.dart';
@@ -9,6 +11,10 @@ import '../features/journal/ui/outing_detail_screen.dart';
 import '../features/journal/ui/outing_form_screen.dart';
 import '../features/map/ui/map_screen.dart';
 import '../features/map/ui/spot_form_screen.dart';
+import '../features/safety/consent_screen.dart';
+import '../features/safety/safety_screen.dart';
+import '../features/settings/data/data_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../features/species/ui/add_species_screen.dart';
 import '../features/species/ui/species_detail_screen.dart';
 import '../features/species/ui/species_list_screen.dart';
@@ -48,6 +54,15 @@ GoRouter buildRouter({String initialLocation = '/splash'}) => GoRouter(
   initialLocation: initialLocation,
   routes: [
     GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
+    GoRoute(path: '/consent', builder: (_, _) => const ConsentScreen()),
+    GoRoute(
+      path: '/settings',
+      builder: (_, _) => const SettingsScreen(),
+      routes: [
+        GoRoute(path: 'data', builder: (_, _) => const DataScreen()),
+        GoRoute(path: 'safety', builder: (_, _) => const SafetyScreen()),
+      ],
+    ),
     StatefulShellRoute(
       navigatorContainerBuilder: (context, shell, children) =>
           _FadingBranches(index: shell.currentIndex, children: children),
@@ -91,6 +106,18 @@ GoRouter buildRouter({String initialLocation = '/splash'}) => GoRouter(
                 path: 'result',
                 builder: (_, state) =>
                     ResultScreen(outcome: state.extra! as IdentificationOutcome),
+              ),
+              GoRoute(
+                path: 'history',
+                builder: (_, _) => const IdentificationHistoryScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    builder: (_, state) => IdentificationDetailScreen(
+                      identificationId: state.pathParameters['id']!,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

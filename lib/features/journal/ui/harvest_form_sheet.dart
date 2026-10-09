@@ -12,19 +12,37 @@ import '../../../data/providers.dart';
 import '../../species/domain/species.dart';
 
 /// Formulaire d'ajout d'une récolte : espèce, quantité, poids en grammes, photo.
-Future<void> showHarvestForm(BuildContext context, String outingId) =>
+/// [initialSpeciesId] et [initialPhotoPath] préremplissent le formulaire (ex.
+/// après une identification confirmée par l'utilisateur).
+Future<void> showHarvestForm(
+  BuildContext context,
+  String outingId, {
+  String? initialSpeciesId,
+  String? initialPhotoPath,
+}) =>
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
-      builder: (_) => HarvestFormSheet(outingId: outingId),
+      builder: (_) => HarvestFormSheet(
+        outingId: outingId,
+        initialSpeciesId: initialSpeciesId,
+        initialPhotoPath: initialPhotoPath,
+      ),
     );
 
 class HarvestFormSheet extends ConsumerStatefulWidget {
-  const HarvestFormSheet({super.key, required this.outingId});
+  const HarvestFormSheet({
+    super.key,
+    required this.outingId,
+    this.initialSpeciesId,
+    this.initialPhotoPath,
+  });
 
   final String outingId;
+  final String? initialSpeciesId;
+  final String? initialPhotoPath;
 
   @override
   ConsumerState<HarvestFormSheet> createState() => _HarvestFormSheetState();
@@ -34,8 +52,8 @@ class _HarvestFormSheetState extends ConsumerState<HarvestFormSheet> {
   final _count = TextEditingController();
   final _weight = TextEditingController();
   final _notes = TextEditingController();
-  String? _speciesId;
-  String? _pickedPath;
+  late String? _speciesId = widget.initialSpeciesId;
+  late String? _pickedPath = widget.initialPhotoPath;
   bool _saving = false;
 
   @override

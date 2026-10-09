@@ -14,4 +14,6 @@ flutter test
 flutter run -d windows        # ou un émulateur Android
 ```
 
-État : squelette V1 (carte, coins, carnet, encyclopédie, identification en **mode démonstration** avec données fictives). Les fiches d'espèces sont provisoires et doivent être validées avant toute diffusion.
+Identification par photo **hors ligne** (BioCLIP + ONNX Runtime) : le modèle n'est pas versionné, voir [tools/bioclip/README.md](tools/bioclip/README.md) pour le générer. Sans lui l'application fonctionne en **mode démonstration** (données fictives). Desktop macOS : `flutter run -d macos` (choix d'une photo dans un fichier, pas d'appareil photo).
+
+État : V1 (carte, coins, carnet, encyclopédie, vibrations de guidage, identification locale — précision à mesurer sur de vraies photos). Les fiches d'espèces sont provisoires et doivent être validées avant toute diffusion.

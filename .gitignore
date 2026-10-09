@@ -120,3 +120,7 @@ app.*.symbols
 # JetBrains
 .idea/
 *.iml
+
+# Modèle BioCLIP converti (115 Mo, au-delà de la limite GitHub) : généré par tools/bioclip/export_bioclip.py
+/assets/models/*.onnx
+/tools/icon/layers/

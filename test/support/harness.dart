@@ -11,6 +11,7 @@ import 'package:mycelium/app.dart';
 import 'package:mycelium/core/router.dart';
 import 'package:mycelium/data/database.dart';
 import 'package:mycelium/data/providers.dart';
+import 'package:mycelium/features/identify/identifier_provider.dart';
 import 'package:mycelium/features/map/location.dart';
 import 'package:mycelium/features/map/map_config.dart';
 
@@ -48,6 +49,8 @@ class TestApp {
           (ref) => Stream.value(LocationState(LocationStatus.ok, testPosition())),
         ),
         tilesEnabledProvider.overrideWithValue(false),
+        // Les tests ne dépendent pas du modèle (115 Mo, non versionné) : démo seule.
+        identifierProvider.overrideWith((ref) async => null),
       ],
       child: MyceliumApp(router: buildRouter(initialLocation: initialLocation)),
     );
