@@ -4,7 +4,12 @@ name: Build iOS (non signé)
 # Sideloadly (qui le signent avec un identifiant Apple gratuit). Aucun compte
 # Apple Developer payant n'est nécessaire. Voir docs/deploiement-iphone.md.
 on:
+  # Bouton « Run workflow » (disponible une fois ce fichier fusionné dans main).
   workflow_dispatch:
+  # Build automatique à l'ouverture / la mise à jour d'une pull request :
+  # fonctionne sans fusionner, le fichier est lu depuis la branche de la PR.
+  pull_request:
+    branches: [main]
   push:
     tags: ['v*']
 
